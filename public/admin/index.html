@@ -82,6 +82,10 @@
         <input type="text" id="mNickname" class="form-control" placeholder="เช่น ต้น, โบ, แนน">
       </div>
       <div class="form-group">
+        <label class="form-label">วันเกิด</label>
+        <input type="date" id="mBirthDate" class="form-control" title="รูปแบบ ปี-เดือน-วัน">
+      </div>
+      <div class="form-group">
         <label class="form-label">ตำแหน่งปัจจุบัน</label>
         <input type="text" id="mPosition" class="form-control" placeholder="ตำแหน่งในวุฒิสภา">
       </div>
@@ -498,6 +502,7 @@
       document.getElementById('mFirstName').value = m.first_name || '';
       document.getElementById('mLastName').value = m.last_name || '';
       document.getElementById('mNickname').value = m.nickname || '';
+      document.getElementById('mBirthDate').value = (m.birth_date && String(m.birth_date).slice(0, 10)) || '';
       document.getElementById('mPosition').value = m.position || '';
       document.getElementById('mOrganization').value = m.organization || '';
       document.getElementById('mDepartment').value = m.department || '';
@@ -516,7 +521,7 @@
       document.getElementById('mGroupId').value = m.group_id || '';
       document.getElementById('mIsLeader').checked = !!m.is_group_leader;
     } else {
-      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mPosition','mOrganization','mDepartment','mExpertise','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
+      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mBirthDate','mPosition','mOrganization','mDepartment','mExpertise','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -536,6 +541,7 @@
       first_name: document.getElementById('mFirstName').value,
       last_name: document.getElementById('mLastName').value,
       nickname: document.getElementById('mNickname').value,
+      birth_date: document.getElementById('mBirthDate').value || null,
       position: document.getElementById('mPosition').value,
       organization: document.getElementById('mOrganization').value,
       department: document.getElementById('mDepartment').value,
@@ -626,7 +632,8 @@
     if (!allMembers || !allMembers.length) { alert('ไม่มีข้อมูลสมาชิก'); return; }
     const rows = allMembers.map(m => ({
       'ลำดับที่': m.number, 'คำนำหน้า': m.prefix||'', 'ชื่อ': m.first_name||'', 'นามสกุล': m.last_name||'',
-      'ชื่อเล่น': m.nickname||'', 'ตำแหน่ง': m.position||'', 'หน่วยงาน': m.organization||'',
+      'ชื่อเล่น': m.nickname||'', 'วันเกิด': (m.birth_date && String(m.birth_date).slice(0, 10)) || '',
+      'ตำแหน่ง': m.position||'', 'หน่วยงาน': m.organization||'',
       'กรม/ฝ่าย': m.department||'', 'ความเชี่ยวชาญ': m.expertise||'', 'ประวัติการศึกษา': m.education||'',
       'ประสบการณ์': m.experience||'', 'วิสัยทัศน์': m.vision||'',
       'กลุ่ม': m.group_name||'', 'หัวหน้ากลุ่ม': m.is_group_leader ? 'ใช่' : '',
@@ -641,6 +648,15 @@
     a.href = url; a.download = 'members_export.csv'; a.click();
     URL.revokeObjectURL(url);
     showToast('✅ Export สำเร็จ!');
+  }
+
+  function parseBirthDateFromCSV(val) {
+    const s = String(val ?? '').trim();
+    if (!s) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    return null;
   }
 
   // --- Import: parse CSV ใน browser แล้วเรียก CRUD API ทีละ row ---
@@ -702,6 +718,9 @@
         youtube: (row['YouTube']||'').trim() || null,
         tiktok: (row['TikTok']||'').trim() || null,
       };
+      if (Object.prototype.hasOwnProperty.call(row, 'วันเกิด')) {
+        payload.birth_date = parseBirthDateFromCSV(row['วันเกิด']) || null;
+      }
 
       try {
         if (numberToId[num]) {

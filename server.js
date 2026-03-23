@@ -17,6 +17,14 @@ function normalizeHexColor(input, fallback) {
   return fallback;
 }
 
+/** รับค่า YYYY-MM-DD หรือว่าง → null ถ้าไม่ถูกต้อง */
+function normalizeBirthDate(input) {
+  if (input == null || input === '') return null;
+  const s = String(input).trim();
+  if (!s) return null;
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null;
+}
+
 const sessionKeys = [process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex')];
 
 // Photo upload — whitelist เฉพาะรูปภาพ เพื่อกันไฟล์ประเภทอันตราย
@@ -130,7 +138,8 @@ app.post('/api/admin/members', requireAuth, async (req, res) => {
   const b = req.body;
   const { data, error } = await supabase.from('members').insert({
     number: parseInt(b.number)||null, prefix: b.prefix||'', first_name: b.first_name||'', last_name: b.last_name||'',
-    nickname: b.nickname||null, position: b.position||null, organization: b.organization||null,
+    nickname: b.nickname||null, birth_date: normalizeBirthDate(b.birth_date),
+    position: b.position||null, organization: b.organization||null,
     department: b.department||null, expertise: b.expertise||null, education: b.education||null,
     experience: b.experience||null, email: b.email||null, phone: b.phone||null,
     line_id: b.line_id||null, linkedin: b.linkedin||null, facebook: b.facebook||null,
@@ -144,17 +153,22 @@ app.post('/api/admin/members', requireAuth, async (req, res) => {
 
 app.put('/api/admin/members/:id', requireAuth, async (req, res) => {
   const b = req.body;
-  const { error } = await supabase.from('members').update({
-    number: parseInt(b.number)||undefined, prefix: b.prefix, first_name: b.first_name, last_name: b.last_name,
-    nickname: b.nickname||null, position: b.position||null, organization: b.organization||null,
-    department: b.department||null, expertise: b.expertise||null, education: b.education||null,
-    experience: b.experience||null, email: b.email||null, phone: b.phone||null,
-    line_id: b.line_id||null, linkedin: b.linkedin||null, facebook: b.facebook||null,
-    instagram: b.instagram||null, youtube: b.youtube||null, tiktok: b.tiktok||null,
-    vision: b.vision||null, group_id: b.group_id?parseInt(b.group_id):null,
-    is_group_leader: b.is_group_leader===true||b.is_group_leader==='true',
+  const patch = {
+    number: parseInt(b.number) || undefined, prefix: b.prefix, first_name: b.first_name, last_name: b.last_name,
+    nickname: b.nickname || null,
+    position: b.position || null, organization: b.organization || null,
+    department: b.department || null, expertise: b.expertise || null, education: b.education || null,
+    experience: b.experience || null, email: b.email || null, phone: b.phone || null,
+    line_id: b.line_id || null, linkedin: b.linkedin || null, facebook: b.facebook || null,
+    instagram: b.instagram || null, youtube: b.youtube || null, tiktok: b.tiktok || null,
+    vision: b.vision || null, group_id: b.group_id ? parseInt(b.group_id) : null,
+    is_group_leader: b.is_group_leader === true || b.is_group_leader === 'true',
     updated_at: new Date().toISOString(),
-  }).eq('id', req.params.id);
+  };
+  if (Object.prototype.hasOwnProperty.call(b, 'birth_date')) {
+    patch.birth_date = normalizeBirthDate(b.birth_date);
+  }
+  const { error } = await supabase.from('members').update(patch).eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
