@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="brandScalesGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8D5A3"/>
+      <stop offset="40%" stop-color="#C5A059"/>
+      <stop offset="100%" stop-color="#7A612E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="14" r="7" fill="url(#brandScalesGold)"/>
+  <rect x="46" y="20" width="8" height="54" rx="2" fill="url(#brandScalesGold)"/>
+  <rect x="10" y="24" width="80" height="7" rx="3.5" fill="url(#brandScalesGold)"/>
+  <line x1="22" y1="31" x2="22" y2="50" stroke="url(#brandScalesGold)" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="78" y1="31" x2="78" y2="50" stroke="url(#brandScalesGold)" stroke-width="2.2" stroke-linecap="round"/>
+  <ellipse cx="22" cy="58" rx="15" ry="5.5" fill="url(#brandScalesGold)" opacity="0.95"/>
+  <ellipse cx="78" cy="58" rx="15" ry="5.5" fill="url(#brandScalesGold)" opacity="0.95"/>
+  <path fill="url(#brandScalesGold)" d="M26 80c10 6 38 8 48 0l-4-4c-8 5-32 5-40 0l-4 4z"/>
+</svg>

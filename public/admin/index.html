@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - ทำเนียบรุ่น พศว. รุ่น 6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -81,9 +81,15 @@
         <label class="form-label">ชื่อเล่น <span style="color:#adb5bd;font-weight:400">(แสดงในวงเล็บหลังชื่อ)</span></label>
         <input type="text" id="mNickname" class="form-control" placeholder="เช่น ต้น, โบ, แนน">
       </div>
-      <div class="form-group">
-        <label class="form-label">วันเกิด</label>
-        <input type="date" id="mBirthDate" class="form-control" title="รูปแบบ ปี-เดือน-วัน">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">วันเกิด</label>
+          <input type="date" id="mBirthDate" class="form-control" title="รูปแบบ ปี-เดือน-วัน" oninput="updateMemberAgeComputed()" onchange="updateMemberAgeComputed()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">อายุ <span style="color:#adb5bd;font-weight:400">(คำนวณจากวันเกิด)</span></label>
+          <input type="text" id="mAgeComputed" class="form-control" readonly tabindex="-1" placeholder="—" style="background:#f1f5f9;color:#334155;font-weight:600" aria-live="polite">
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">ตำแหน่งปัจจุบัน</label>
@@ -245,6 +251,43 @@
       .replace(/'/g, '&#039;');
   }
 
+  function thaiFullnameParts(prefix, firstName, lastName) {
+    const p = escapeHtml(String(prefix ?? '').trim());
+    const f = escapeHtml(String(firstName ?? '').trim());
+    const l = escapeHtml(String(lastName ?? '').trim());
+    return `<span class="name-prefix">${p}</span><span class="name-first">${f}</span> <span class="name-last">${l}</span>`;
+  }
+  function thaiFullnameHtml(prefix, firstName, lastName) {
+    return `<div class="user-fullname">${thaiFullnameParts(prefix, firstName, lastName)}</div>`;
+  }
+
+  /** อายุเต็มปีจากค่า input date (YYYY-MM-DD) */
+  function computeAgeFromBirthInput(iso) {
+    if (!iso || String(iso).trim().length < 8) return null;
+    const s = String(iso).trim().slice(0, 10);
+    const p = s.split('-');
+    if (p.length !== 3) return null;
+    const y = parseInt(p[0], 10);
+    const mo = parseInt(p[1], 10) - 1;
+    const d = parseInt(p[2], 10);
+    if (!y || mo < 0 || mo > 11 || !d) return null;
+    const birth = new Date(y, mo, d);
+    if (isNaN(birth.getTime())) return null;
+    const t = new Date();
+    let age = t.getFullYear() - birth.getFullYear();
+    const md = t.getMonth() - birth.getMonth();
+    if (md < 0 || (md === 0 && t.getDate() < birth.getDate())) age--;
+    return age >= 0 ? age : null;
+  }
+
+  function updateMemberAgeComputed() {
+    const birth = document.getElementById('mBirthDate');
+    const out = document.getElementById('mAgeComputed');
+    if (!birth || !out) return;
+    const age = computeAgeFromBirthInput(birth.value);
+    out.value = age != null ? age + ' ปี' : '';
+  }
+
   function safeHexColor(color, fallback) {
     const v = String(color ?? '').trim();
     return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : fallback;
@@ -289,7 +332,7 @@
   }
 
   function buildRoleButtons() {
-    const btnStyle = 'font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;font-family:Sarabun,sans-serif;transition:all 0.15s';
+    const btnStyle = 'font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;font-family:"Prompt","Sarabun",sans-serif;transition:all 0.15s';
     const thContainer = document.getElementById('oRoleButtons');
     const enContainer = document.getElementById('oRoleEnButtons');
     // keep the label span, replace buttons only
@@ -442,9 +485,7 @@
   function renderMemberTable(members) {
     document.getElementById('memberTableBody').innerHTML = members.map(m => {
       const photoUrl = safeUrl(m.photo);
-      const prefix = escapeHtml(m.prefix || '');
       const first = escapeHtml(m.first_name || '');
-      const last = escapeHtml(m.last_name || '');
       const number = escapeHtml(m.number);
       const positionHtml = m.position ? escapeHtml(m.position) : '<span style="color:#adb5bd">-</span>';
 
@@ -462,7 +503,7 @@
                 ${photoUrl ? `<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='👤'">` : '<span style="color:#e8c96a;font-size:14px">👤</span>'}
               </div>
               <div>
-                <div style="font-weight:600;font-size:14px">${prefix}${first} ${last}</div>
+                <div style="font-size:14px">${thaiFullnameHtml(m.prefix, m.first_name, m.last_name)}</div>
               </div>
             </div>
           </td>
@@ -503,6 +544,7 @@
       document.getElementById('mLastName').value = m.last_name || '';
       document.getElementById('mNickname').value = m.nickname || '';
       document.getElementById('mBirthDate').value = (m.birth_date && String(m.birth_date).slice(0, 10)) || '';
+      updateMemberAgeComputed();
       document.getElementById('mPosition').value = m.position || '';
       document.getElementById('mOrganization').value = m.organization || '';
       document.getElementById('mDepartment').value = m.department || '';
@@ -521,7 +563,7 @@
       document.getElementById('mGroupId').value = m.group_id || '';
       document.getElementById('mIsLeader').checked = !!m.is_group_leader;
     } else {
-      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mBirthDate','mPosition','mOrganization','mDepartment','mExpertise','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
+      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mBirthDate','mAgeComputed','mPosition','mOrganization','mDepartment','mExpertise','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -530,6 +572,7 @@
       document.getElementById('mNumber').value = String(nextNum);
       document.getElementById('mIsLeader').checked = false;
     }
+    updateMemberAgeComputed();
     openModal('memberModal');
   }
 
@@ -784,7 +827,7 @@
         <tbody>
           ${sorted.map(o => `<tr>
             <td>${escapeHtml(o.sort_order)}</td>
-            <td style="font-weight:600">${escapeHtml(o.prefix || '')}${escapeHtml(o.first_name || '')} ${escapeHtml(o.last_name || '')}</td>
+            <td>${thaiFullnameHtml(o.prefix, o.first_name, o.last_name)}</td>
             <td><span style="background:#0d1f4f15;color:#0d1f4f;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">${escapeHtml(o.role_th || '')}</span></td>
             <td style="font-size:13px;color:#6c757d">${escapeHtml(o.role_en || '-')}</td>
             <td><div style="display:flex;gap:6px">
@@ -802,7 +845,7 @@
     document.getElementById('officerModalTitle').textContent = id ? 'แก้ไขคณะกรรมการ' : 'เพิ่มคณะกรรมการ';
     document.getElementById('officerModalAlert').innerHTML = '';
     document.getElementById('oMemberId').innerHTML = allMembers.map(m =>
-      `<option value="${m.id}">${escapeHtml(m.number)}. ${escapeHtml(m.prefix || '')}${escapeHtml(m.first_name || '')} ${escapeHtml(m.last_name || '')}</option>`
+      `<option value="${m.id}">${escapeHtml(m.number)}. ${escapeHtml(String(m.prefix || '').trim())}${escapeHtml(String(m.first_name || '').trim())} ${escapeHtml(String(m.last_name || '').trim())}</option>`
     ).join('');
     buildRoleButtons();
     if (id) {
@@ -896,7 +939,7 @@
             <div style="display:flex;flex-wrap:wrap;gap:6px">
               ${g.members.length ? g.members.map(m => `
                 <span style="background:${safeHexColor(g.color, '#1a2b5e')}15;color:${safeHexColor(g.color, '#1a2b5e')};border:1px solid ${safeHexColor(g.color, '#1a2b5e')}40;padding:2px 10px;border-radius:20px;font-size:12px">
-                  ${m.is_group_leader ? '⭐ ' : ''}${escapeHtml(m.prefix || '')}${escapeHtml(m.first_name || '')} ${escapeHtml(m.last_name || '')}
+                  ${m.is_group_leader ? '⭐ ' : ''}<span class="user-fullname">${thaiFullnameParts(m.prefix, m.first_name, m.last_name)}</span>
                 </span>
               `).join('') : '<span style="color:#adb5bd;font-size:12px">ยังไม่มีสมาชิก</span>'}
             </div>
@@ -1021,7 +1064,7 @@
 
   function showToast(msg) {
     const toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0d1f4f;color:white;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;font-family:Sarabun,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.2)';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0d1f4f;color:white;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;font-family:"Prompt","Sarabun",sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.2)';
     toast.textContent = '✅ ' + msg;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);

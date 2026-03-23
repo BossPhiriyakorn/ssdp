@@ -2,49 +2,68 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ทำเนียบรุ่น พศว. รุ่น 6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-  <!-- Navbar -->
-  <nav class="navbar">
+<body class="home-page">
+  <!-- Fixed nav: full-width at top; adds .scrolled (island) when scrollY > 50 — see main.js + .navbar.scrolled in CSS -->
+  <nav class="navbar" id="siteNavbar" aria-label="หลัก">
     <div class="navbar-inner">
       <a href="/" class="navbar-brand">
-        <div class="brand-icon">⚖️</div>
+        <div class="brand-icon" aria-hidden="true">
+          <span class="brand-icon__emoji">⚖️</span>
+        </div>
         <div class="brand-text">
           <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
           <div class="title-en">Senate Staff Development Program Batch 6</div>
         </div>
       </a>
-      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
-      <ul class="navbar-nav" id="navMenu">
-        <li><a href="/" class="active">👥 สมาชิก</a></li>
-        <li><a href="/officers">🏅 คณะกรรมการ</a></li>
-        <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
-      </ul>
+      <div class="navbar-actions">
+        <button type="button" class="navbar-toggle" id="navToggle" aria-label="เปิดเมนู" aria-controls="navMenu" aria-expanded="false" onclick="toggleMenu(event)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" x2="20" y1="6" y2="6"/>
+            <line x1="4" x2="20" y1="12" y2="12"/>
+            <line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+        </button>
+        <ul class="navbar-nav" id="navMenu">
+          <li><a href="/" class="active">👥 สมาชิก</a></li>
+          <li><a href="/officers">🏅 คณะกรรมการ</a></li>
+          <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-emblem">⚖️</div>
-    <h1 id="heroTitle">ทำเนียบรุ่น พศว. รุ่น 6</h1>
-    <h2 id="heroSubtitle">โครงการพัฒนาศักยภาพผู้ปฏิบัติงานของสมาชิกวุฒิสภา รุ่นที่ 6</h2>
-    <p id="heroYear">ประจำปีงบประมาณ พ.ศ. 2569</p>
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <span class="number" id="totalCount">108</span>
-        <div class="label">สมาชิกทั้งหมด</div>
+  <main class="site-main">
+  <!-- Cover: prestige minimalist hero (royal navy + gold); top padding clears fixed nav -->
+  <header class="hero site-header hero-cover" aria-label="ภาพปกทำเนียบรุ่น">
+    <div class="hero-cover__texture" aria-hidden="true"></div>
+    <div class="hero-main hero-cover__inner">
+      <div class="hero-cover__emblem" aria-hidden="true">
+        <span class="hero-cover__scales">⚖️</span>
       </div>
-      <div class="hero-stat">
-        <span class="number">5</span>
-        <div class="label">กลุ่มย่อย</div>
+      <h1 class="hero-cover__title" id="heroTitle">ทำเนียบรุ่น พศว. รุ่น 6</h1>
+      <p class="hero-cover__lead" id="heroSubtitle">โครงการพัฒนาศักยภาพผู้ปฏิบัติงานของสมาชิกวุฒิสภา รุ่นที่ 6</p>
+      <p class="hero-cover__meta" id="heroYear">ประจำปีงบประมาณ พ.ศ. 2569</p>
+      <div class="hero-cover__stats" role="group" aria-label="สรุปข้อมูลรุ่น">
+        <div class="hero-stat-block hero-stat-block--members">
+          <span class="hero-stat-icon" aria-hidden="true"><i data-lucide="users"></i></span>
+          <span class="hero-stat-number" id="totalCount" data-stat-target="108">108</span>
+          <span class="hero-stat-desc">สมาชิกทั้งหมด</span>
+        </div>
+        <div class="hero-stat-block hero-stat-block--groups">
+          <span class="hero-stat-icon" aria-hidden="true"><i data-lucide="layers"></i></span>
+          <span class="hero-stat-number" id="groupsCount" data-stat-target="5">5</span>
+          <span class="hero-stat-desc">กลุ่มย่อย</span>
+        </div>
       </div>
     </div>
-  </section>
+  </header>
 
   <!-- Search -->
   <section class="search-section">
@@ -61,6 +80,11 @@
       <div class="members-grid" id="membersGrid">
         <div class="loading"><div class="spinner"></div><span>กำลังโหลดข้อมูล...</span></div>
       </div>
+      <nav class="members-pagination" id="membersPagination" aria-label="แบ่งหน้ารายชื่อสมาชิก" hidden>
+        <button type="button" class="members-pagination__btn" id="membersPrevBtn" onclick="membersPrevPage()">← ก่อนหน้า</button>
+        <span class="members-pagination__info" id="membersPageInfo">หน้า 1 / 1</span>
+        <button type="button" class="members-pagination__btn" id="membersNextBtn" onclick="membersNextPage()">ถัดไป →</button>
+      </nav>
     </div>
   </div>
 
@@ -70,10 +94,16 @@
     <p style="margin-top:4px">สำนักงานเลขาธิการวุฒิสภา</p>
     <p class="footer-credit">AI Solution Powered by <a href="https://tectony.co.th" target="_blank" rel="noopener">TecTony.co.th</a></p>
   </footer>
+  </main>
 
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
+  <script src="/js/hero-stats.js"></script>
   <script src="/js/main.js"></script>
   <script>
     let allMembers = [];
+    let currentMemberList = [];
+    let currentPage = 1;
+    const MEMBERS_PAGE_SIZE = 10;
 
     function escapeHtml(s) {
       return String(s ?? '')
@@ -82,6 +112,14 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    /** คำนำหน้าชิดชื่อ · ช่องว่าง 1 ช่องก่อนนามสกุล (มาตรฐานไทย) */
+    function thaiFullnameHtml(prefix, firstName, lastName) {
+      const p = escapeHtml(String(prefix ?? '').trim());
+      const f = escapeHtml(String(firstName ?? '').trim());
+      const l = escapeHtml(String(lastName ?? '').trim());
+      return `<div class="user-fullname"><span class="name-prefix">${p}</span><span class="name-first">${f}</span> <span class="name-last">${l}</span></div>`;
     }
 
     function safeHexColor(color, fallback) {
@@ -109,47 +147,107 @@
     async function loadMembers() {
       try {
         allMembers = await fetch('/api/members').then(r => r.json());
-        document.getElementById('totalCount').textContent = allMembers.length;
+        const n = allMembers.length;
+        const totalEl = document.getElementById('totalCount');
+        if (window.HeroStats && typeof window.HeroStats.setMemberCount === 'function') {
+          window.HeroStats.setMemberCount(n);
+        } else if (totalEl) {
+          totalEl.setAttribute('data-stat-target', String(n));
+          totalEl.textContent = String(n);
+        }
         renderMembers(allMembers);
       } catch(e) {
         document.getElementById('membersGrid').innerHTML = '<p style="color:red;padding:20px">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
       }
     }
 
-    function renderMembers(members) {
+    function memberCardHtml(m) {
+      const photoUrl = safeUrl(m.photo);
+      const color = safeHexColor(m.group_color, '#1a2b5e');
+      const first = escapeHtml(m.first_name || '');
+      const nickname = escapeHtml(m.nickname || '');
+      const position = escapeHtml(m.position || '');
+      const groupName = escapeHtml(m.group_name || '');
+      return `
+        <a href="/member/${m.id}" class="member-card">
+          <span class="member-number">ลำดับที่ ${escapeHtml(m.number)}</span>
+          ${photoUrl
+            ? `<div class="member-avatar"><img src="${photoUrl}" alt="${first}" onerror="var w=this.parentElement;w.classList.add('member-avatar--fallback');w.innerHTML='<span class=\\'member-avatar__emoji\\' aria-hidden=\\'true\\'>⚖️</span>';"></div>`
+            : `<div class="member-avatar member-avatar--fallback" aria-hidden="true"><span class="member-avatar__emoji">⚖️</span></div>`
+          }
+          <div class="member-card-name">${thaiFullnameHtml(m.prefix, m.first_name, m.last_name)}${m.nickname ? `<span class="member-card-nickname">(${nickname})</span>` : ''}</div>
+          <p class="member-card-position">${position || '\u00A0'}</p>
+          ${m.group_name ? `<span class="member-card-badge" style="background:${color}18;color:${color};border:1px solid ${color}35">🏷️ ${groupName}</span>` : ''}
+        </a>
+      `;
+    }
+
+    function paintMembersGrid() {
       const grid = document.getElementById('membersGrid');
-      document.getElementById('membersCount').textContent = `แสดง ${members.length} รายการ จากทั้งหมด ${allMembers.length} ท่าน`;
+      const pag = document.getElementById('membersPagination');
+      const prevBtn = document.getElementById('membersPrevBtn');
+      const nextBtn = document.getElementById('membersNextBtn');
+      const pageInfo = document.getElementById('membersPageInfo');
+      const countEl = document.getElementById('membersCount');
+      const members = currentMemberList;
+      const q = document.getElementById('searchInput').value.trim();
+      const isFiltered = q.length > 0;
+
       if (!members.length) {
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>ไม่พบสมาชิกที่ค้นหา</p></div>`;
+        pag.hidden = true;
+        countEl.textContent = isFiltered
+          ? 'ไม่พบรายการที่ตรงกับการค้นหา'
+          : `แสดง 0 รายการ จากทั้งหมด ${allMembers.length} ท่าน`;
         return;
       }
-      grid.innerHTML = members.map(m => {
-        const photoUrl = safeUrl(m.photo);
-        const color = safeHexColor(m.group_color, '#1a2b5e');
-        const prefix = escapeHtml(m.prefix || '');
-        const first = escapeHtml(m.first_name || '');
-        const last = escapeHtml(m.last_name || '');
-        const nickname = escapeHtml(m.nickname || '');
-        const position = escapeHtml(m.position || '');
-        const groupName = escapeHtml(m.group_name || '');
 
-        return `
-          <a href="/member/${m.id}" class="member-card">
-            <div class="member-card-top">
-              <div class="member-number">ลำดับที่ ${escapeHtml(m.number)}</div>
-              ${photoUrl
-                ? `<div class="member-avatar"><img src="${photoUrl}" alt="${first}" onerror="this.parentElement.innerHTML='<div style=\\'font-size:28px;color:#e8c96a\\'>👤</div>'"></div>`
-                : `<div class="member-avatar-placeholder">👤</div>`
-              }
-              <div class="member-card-name">${prefix}${first} ${last}${m.nickname ? `<span class="member-card-nickname">(${nickname})</span>` : ''}</div>
-            </div>
-            <div class="member-card-body">
-              <div class="member-card-position">${position}</div>
-              ${m.group_name ? `<span class="member-card-badge" style="background:${color}20;color:${color}">🏷️ ${groupName}</span>` : ''}
-            </div>
-          </a>
-        `;
-      }).join('');
+      const total = members.length;
+      const totalPages = Math.max(1, Math.ceil(total / MEMBERS_PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * MEMBERS_PAGE_SIZE;
+      const pageSlice = members.slice(start, start + MEMBERS_PAGE_SIZE);
+      const from = start + 1;
+      const to = start + pageSlice.length;
+
+      const countText = isFiltered
+        ? `แสดงรายการ ${from}–${to} จาก ${total} รายการที่ค้นพบ · หน้า ${currentPage} / ${totalPages} (ในรุ่นทั้งหมด ${allMembers.length} ท่าน)`
+        : `แสดงรายการ ${from}–${to} จากทั้งหมด ${allMembers.length} ท่าน · หน้า ${currentPage} / ${totalPages}`;
+      countEl.textContent = countText;
+
+      grid.innerHTML = pageSlice.map(memberCardHtml).join('');
+
+      if (totalPages <= 1) {
+        pag.hidden = true;
+      } else {
+        pag.hidden = false;
+        pageInfo.textContent = `หน้า ${currentPage} / ${totalPages}`;
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= totalPages;
+      }
+    }
+
+    function renderMembers(members) {
+      currentMemberList = members;
+      currentPage = 1;
+      paintMembersGrid();
+    }
+
+    function membersPrevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        paintMembersGrid();
+        document.getElementById('membersGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function membersNextPage() {
+      const totalPages = Math.max(1, Math.ceil(currentMemberList.length / MEMBERS_PAGE_SIZE));
+      if (currentPage < totalPages) {
+        currentPage++;
+        paintMembersGrid();
+        document.getElementById('membersGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function filterMembers() {

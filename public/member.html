@@ -2,28 +2,40 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Profile - ทำเนียบรุ่น พศว. รุ่น 6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <nav class="navbar">
+  <nav class="navbar" id="siteNavbar" aria-label="หลัก">
     <div class="navbar-inner">
       <a href="/" class="navbar-brand">
-        <div class="brand-icon">⚖️</div>
+        <div class="brand-icon" aria-hidden="true">
+          <span class="brand-icon__emoji">⚖️</span>
+        </div>
         <div class="brand-text">
           <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
           <div class="title-en">Senate Staff Development Program Batch 6</div>
         </div>
       </a>
-      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
-      <ul class="navbar-nav" id="navMenu">
-        <li><a href="/">👥 สมาชิก</a></li>
-        <li><a href="/officers">🏅 คณะกรรมการ</a></li>
-        <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
-      </ul>
+      <div class="navbar-actions">
+        <button type="button" class="navbar-toggle" id="navToggle" aria-label="เปิดเมนู" aria-controls="navMenu" aria-expanded="false" onclick="toggleMenu(event)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" x2="20" y1="6" y2="6"/>
+            <line x1="4" x2="20" y1="12" y2="12"/>
+            <line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+        </button>
+        <ul class="navbar-nav" id="navMenu">
+          <li><a href="/">👥 สมาชิก</a></li>
+          <li><a href="/officers">🏅 คณะกรรมการ</a></li>
+          <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
 
@@ -35,77 +47,103 @@
     <div class="profile-page">
       <a href="/" class="back-btn">← กลับสู่รายชื่อสมาชิก</a>
 
-      <div class="profile-card">
-        <!-- Header -->
-        <div class="profile-header">
+      <article class="profile-card profile-card--enterprise" aria-label="รายละเอียดสมาชิก">
+        <!-- Hero: prestige minimalist (no navy block) -->
+        <header class="profile-hero">
           <div class="profile-photo-wrap">
-            <div class="profile-photo" id="profilePhoto">👤</div>
-          </div>
-          <div class="profile-info">
-            <div class="profile-number" id="profileNumber"></div>
-            <div class="profile-name" id="profileName"></div>
-            <div class="profile-position" id="profilePosition"></div>
-            <div class="profile-org" id="profileOrg"></div>
-            <div id="profileGroupBadge"></div>
-          </div>
-        </div>
-
-        <!-- Body -->
-        <div class="profile-body">
-          <!-- Professional Info -->
-          <div class="profile-section">
-            <div class="profile-section-title">💼 ข้อมูลการทำงาน</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-              <div class="profile-field">
-                <div class="profile-field-label">ตำแหน่ง</div>
-                <div class="profile-field-value" id="pfPosition"></div>
-              </div>
-              <div class="profile-field">
-                <div class="profile-field-label">หน่วยงาน / สังกัด</div>
-                <div class="profile-field-value" id="pfOrganization"></div>
-              </div>
-              <div class="profile-field">
-                <div class="profile-field-label">กรม / ฝ่าย</div>
-                <div class="profile-field-value" id="pfDepartment"></div>
-              </div>
-              <div class="profile-field">
-                <div class="profile-field-label">ความเชี่ยวชาญ</div>
-                <div class="profile-field-value" id="pfExpertise"></div>
-              </div>
+            <div class="profile-photo profile-photo--fallback" id="profilePhoto" aria-hidden="true">
+              <span class="member-avatar__emoji profile-photo__emoji-fallback" aria-hidden="true">⚖️</span>
             </div>
           </div>
+          <h1 class="profile-title" id="profileName"></h1>
+          <div class="profile-badges" id="profileBadges" aria-label="ป้ายข้อมูล"></div>
+          <div class="profile-hero-meta" id="profileHeroMeta"></div>
+        </header>
 
-          <!-- Education -->
-          <div class="profile-section" id="sectionEducation">
-            <div class="profile-section-title">🎓 ประวัติการศึกษา</div>
-            <div class="profile-field-value" id="pfEducation"></div>
-          </div>
+        <div class="profile-details">
+          <!-- A: Work -->
+          <section class="profile-panel" aria-labelledby="profile-work-heading">
+            <h2 class="profile-panel__head" id="profile-work-heading">
+              <i data-lucide="briefcase" width="18" height="18" aria-hidden="true"></i>
+              <span>ข้อมูลการทำงาน</span>
+            </h2>
+            <div class="profile-panel__grid profile-panel__grid--2">
+              <div class="profile-kv">
+                <div class="profile-kv__label">กรม / ฝ่าย</div>
+                <div class="profile-kv__value" id="pfDepartment"></div>
+              </div>
+              <div class="profile-kv">
+                <div class="profile-kv__label">ความเชี่ยวชาญ</div>
+                <div class="profile-kv__value" id="pfExpertise"></div>
+              </div>
+            </div>
+          </section>
 
-          <!-- Experience -->
-          <div class="profile-section" id="sectionExperience">
-            <div class="profile-section-title">📋 ประสบการณ์สำคัญ</div>
-            <div class="profile-field-value" id="pfExperience"></div>
-          </div>
+          <!-- B: Personal, education, highlights & contact -->
+          <section class="profile-panel" aria-labelledby="profile-personal-heading">
+            <h2 class="profile-panel__head" id="profile-personal-heading">
+              <i data-lucide="user-circle" width="18" height="18" aria-hidden="true"></i>
+              <span>ข้อมูลส่วนตัว &amp; ข้อมูลสำคัญ</span>
+            </h2>
+            <div class="profile-panel__grid profile-panel__grid--personal">
+              <div class="profile-kv">
+                <div class="profile-kv__label">ชื่อเล่น</div>
+                <div class="profile-kv__value" id="pfNickname"></div>
+              </div>
+              <div class="profile-kv profile-kv--birth-age">
+                <div class="profile-kv-birth-age">
+                  <div class="profile-kv-birth-age__col">
+                    <div class="profile-kv__label">วันเกิด</div>
+                    <div class="profile-kv__value" id="pfBirthDate"></div>
+                  </div>
+                  <div class="profile-kv-birth-age__sep" aria-hidden="true"></div>
+                  <div class="profile-kv-birth-age__col">
+                    <div class="profile-kv__label">อายุ</div>
+                    <div class="profile-kv__value" id="pfAge"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <!-- Vision -->
-          <div class="profile-section" id="sectionVision">
-            <div class="profile-section-title">🌟 วิสัยทัศน์ / บทบาทในรุ่น</div>
-            <div class="profile-field-value" id="pfVision"></div>
-          </div>
+            <div class="profile-panel__divider" role="presentation"></div>
 
-          <!-- Contact -->
-          <div class="profile-section">
-            <div class="profile-section-title">📞 ช่องทางการติดต่อ</div>
-            <div class="contact-grid" id="contactGrid"></div>
-          </div>
+            <div class="profile-kv profile-kv--block-full">
+              <div class="profile-kv__label profile-kv__label--with-icon">
+                <i data-lucide="graduation-cap" width="16" height="16" aria-hidden="true"></i>
+                ประวัติการศึกษา
+              </div>
+              <div class="profile-kv__value profile-kv__value--block" id="pfEducation"></div>
+            </div>
 
-          <!-- Group Info -->
-          <div class="profile-section" id="sectionGroup" style="display:none">
-            <div class="profile-section-title">🏷️ กลุ่มย่อย</div>
-            <div id="pfGroupInfo"></div>
-          </div>
+            <div class="profile-panel__divider" role="presentation"></div>
+            <div class="profile-kv profile-kv--block-full">
+              <div class="profile-kv__label profile-kv__label--with-icon">
+                <i data-lucide="clipboard-list" width="16" height="16" aria-hidden="true"></i>
+                ประสบการณ์สำคัญ
+              </div>
+              <div class="profile-kv__value profile-kv__value--block" id="pfExperience"></div>
+            </div>
+
+            <div class="profile-panel__divider" role="presentation"></div>
+            <div class="profile-kv profile-kv--block-full">
+              <div class="profile-kv__label profile-kv__label--with-icon">
+                <i data-lucide="sparkles" width="16" height="16" aria-hidden="true"></i>
+                วิสัยทัศน์ / บทบาทในรุ่น
+              </div>
+              <div class="profile-kv__value profile-kv__value--block" id="pfVision"></div>
+            </div>
+
+            <div class="profile-panel__divider" role="presentation"></div>
+            <div class="profile-kv profile-kv--block-full">
+              <div class="profile-kv__label profile-kv__label--with-icon">
+                <i data-lucide="phone" width="16" height="16" aria-hidden="true"></i>
+                ช่องทางการติดต่อ
+              </div>
+              <div class="profile-contact-wrap profile-contact-stack" id="contactGrid"></div>
+            </div>
+          </section>
         </div>
-      </div>
+      </article>
 
       <!-- Navigation -->
       <div style="display:flex;justify-content:space-between;margin-top:20px;gap:12px;flex-wrap:wrap">
@@ -126,13 +164,67 @@
 
     function setField(id, value, sectionId) {
       const el = document.getElementById(id);
-      if (value && value.trim()) {
-        el.textContent = value;
-        el.className = 'profile-field-value';
+      if (!el) return;
+      const v = value != null ? String(value).trim() : '';
+      const base = el.className.includes('profile-kv__value--block')
+        ? 'profile-kv__value profile-kv__value--block'
+        : 'profile-kv__value';
+      if (v) {
+        el.textContent = v;
+        el.className = base;
+        if (sectionId) {
+          const sec = document.getElementById(sectionId);
+          if (sec) sec.hidden = false;
+        }
       } else {
         el.textContent = 'ยังไม่ได้ระบุ';
-        el.className = 'profile-field-value empty';
-        if (sectionId) document.getElementById(sectionId).style.display = 'none';
+        el.className = base + ' empty';
+        if (sectionId) {
+          const sec = document.getElementById(sectionId);
+          if (sec) sec.hidden = true;
+        }
+      }
+    }
+
+    /** อายุเต็มปี จาก ISO วันที่เกิด (YYYY-MM-DD) */
+    function calculateAgeYears(iso) {
+      if (!iso) return null;
+      const s = String(iso).trim().slice(0, 10);
+      const p = s.split('-');
+      if (p.length !== 3) return null;
+      const y = parseInt(p[0], 10);
+      const mo = parseInt(p[1], 10) - 1;
+      const d = parseInt(p[2], 10);
+      if (!y || mo < 0 || mo > 11 || !d) return null;
+      const birth = new Date(y, mo, d);
+      if (isNaN(birth.getTime())) return null;
+      const t = new Date();
+      let age = t.getFullYear() - birth.getFullYear();
+      const md = t.getMonth() - birth.getMonth();
+      if (md < 0 || (md === 0 && t.getDate() < birth.getDate())) age--;
+      return age >= 0 ? age : null;
+    }
+
+    function formatBirthDateTh(iso) {
+      if (!iso) return '';
+      const s = String(iso).trim().slice(0, 10);
+      const p = s.split('-');
+      if (p.length !== 3) return String(iso);
+      const y = parseInt(p[0], 10);
+      const mo = p[1];
+      const da = p[2];
+      if (!y || !mo || !da) return String(iso);
+      const be = y + 543;
+      return `${parseInt(da, 10)}/${parseInt(mo, 10)}/${be} (พ.ศ. ${be})`;
+    }
+
+    function refreshProfileIcons() {
+      if (!window.lucide || typeof lucide.createIcons !== 'function') return;
+      try {
+        const root = document.querySelector('.profile-card--enterprise');
+        lucide.createIcons(root ? { root, attrs: { 'stroke-width': 2 } } : { attrs: { 'stroke-width': 2 } });
+      } catch (e) {
+        try { lucide.createIcons(); } catch (e2) {}
       }
     }
 
@@ -143,6 +235,13 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    function thaiFullnameHtml(prefix, firstName, lastName) {
+      const p = escapeHtml(String(prefix ?? '').trim());
+      const f = escapeHtml(String(firstName ?? '').trim());
+      const l = escapeHtml(String(lastName ?? '').trim());
+      return `<div class="user-fullname"><span class="name-prefix">${p}</span><span class="name-first">${f}</span> <span class="name-last">${l}</span></div>`;
     }
 
     function safeHexColor(color, fallback) {
@@ -173,90 +272,146 @@
         const m = await fetch(`/api/members/${memberId}`).then(r => r.json());
         document.title = `${m.prefix}${m.first_name} ${m.last_name} - ทำเนียบรุ่น พศว. รุ่น 6`;
 
-        // Header
-        document.getElementById('profileNumber').textContent = `ลำดับที่ ${m.number}`;
-        const nickname = m.nickname ? ` (${m.nickname})` : '';
-        document.getElementById('profileName').textContent = `${m.prefix || ''}${m.first_name} ${m.last_name}${nickname}`;
-        document.getElementById('profilePosition').textContent = m.position || '';
-        document.getElementById('profileOrg').textContent = m.organization || '';
+        const nickInline = m.nickname
+          ? ` <span class="profile-nickname-inline">(${escapeHtml(m.nickname)})</span>`
+          : '';
+        document.getElementById('profileName').innerHTML = thaiFullnameHtml(m.prefix, m.first_name, m.last_name) + nickInline;
 
-        // Photo
+        const numB = `<span class="profile-badge">ลำดับที่ ${escapeHtml(String(m.number))}</span>`;
+        const gColor = safeHexColor(m.group_color, '#64748b');
+        const grpB = m.group_name
+          ? `<span class="profile-badge profile-badge--tint" style="background:${gColor}1a;border-color:${gColor}45">${m.is_group_leader ? '⭐ ' : ''}กลุ่ม: ${escapeHtml(m.group_name)}</span>`
+          : '<span class="profile-badge profile-badge--ghost">กลุ่ม: ยังไม่กำหนด</span>';
+        document.getElementById('profileBadges').innerHTML = numB + grpB;
+
+        const pos = (m.position || '').trim();
+        const org = (m.organization || '').trim();
+        const metaEl = document.getElementById('profileHeroMeta');
+        if (!pos && !org) metaEl.innerHTML = '';
+        else {
+          metaEl.innerHTML = [
+            pos ? `<p class="profile-hero-meta__line">${escapeHtml(pos)}</p>` : '',
+            org ? `<p class="profile-hero-meta__line profile-hero-meta__line--sub">${escapeHtml(org)}</p>` : ''
+          ].join('');
+        }
+
         const photoEl = document.getElementById('profilePhoto');
         const photoUrl = safeUrl(m.photo);
+        function setProfilePhotoFallback() {
+          photoEl.classList.add('profile-photo--fallback');
+          photoEl.innerHTML = '<span class="member-avatar__emoji profile-photo__emoji-fallback" aria-hidden="true">⚖️</span>';
+        }
         if (photoUrl) {
+          photoEl.classList.remove('profile-photo--fallback');
+          photoEl.innerHTML = '';
           const img = document.createElement('img');
           img.src = photoUrl;
-          img.alt = m.first_name || '';
-          img.onerror = () => { photoEl.textContent = '👤'; };
-          photoEl.innerHTML = '';
+          img.alt = [m.prefix, m.first_name, m.last_name].filter(Boolean).join(' ') || '';
+          img.decoding = 'async';
+          img.onerror = function () { setProfilePhotoFallback(); };
           photoEl.appendChild(img);
+        } else {
+          setProfilePhotoFallback();
         }
 
-        // Group badge
-        if (m.group_name) {
-          const color = safeHexColor(m.group_color, '#1a2b5e');
-          const badge = document.createElement('div');
-          badge.className = 'profile-group-badge';
-          badge.style.background = `${color}40`;
-          badge.textContent = `🏷️ ${m.group_name}${m.is_group_leader ? ' · หัวหน้ากลุ่ม' : ''}`;
-          const el = document.getElementById('profileGroupBadge');
-          el.innerHTML = '';
-          el.appendChild(badge);
-        }
-
-        // Fields
-        setField('pfPosition', m.position);
-        setField('pfOrganization', m.organization);
         setField('pfDepartment', m.department);
         setField('pfExpertise', m.expertise);
-        setField('pfEducation', m.education, 'sectionEducation');
-        setField('pfExperience', m.experience, 'sectionExperience');
-        setField('pfVision', m.vision, 'sectionVision');
+        setField('pfEducation', m.education);
 
-        // Contact & Social Media
-        const contacts = [
-          { key: 'email',     icon: emailIcon(),     label: 'อีเมล',      value: m.email,     href: safeEmail(m.email) ? 'mailto:'+safeEmail(m.email) : null,       bg: '#EA4335' },
-          { key: 'phone',     icon: phoneIcon(),     label: 'โทรศัพท์',   value: m.phone,     href: safeTel(m.phone) ? 'tel:'+safeTel(m.phone) : null, bg: '#34A853' },
-          { key: 'line_id',   icon: lineIcon(),      label: 'LINE ID',     value: m.line_id,   href: null,                                     bg: '#06C755' },
-          { key: 'linkedin',  icon: linkedinIcon(),  label: 'LinkedIn',    value: m.linkedin,  href: safeUrl(m.linkedin),                               bg: '#0A66C2' },
-          { key: 'facebook',  icon: facebookIcon(),  label: 'Facebook',    value: m.facebook,  href: safeUrl(m.facebook),                               bg: '#1877F2' },
-          { key: 'instagram', icon: instagramIcon(), label: 'Instagram',   value: m.instagram, href: safeUrl(m.instagram),                              bg: '#E1306C' },
-          { key: 'youtube',   icon: youtubeIcon(),   label: 'YouTube',     value: m.youtube,   href: safeUrl(m.youtube),                                bg: '#FF0000' },
-          { key: 'tiktok',    icon: tiktokIcon(),    label: 'TikTok',      value: m.tiktok,    href: safeUrl(m.tiktok),                                 bg: '#010101' },
-        ].filter(c => c.value);
+        const nickTrim = (m.nickname || '').trim();
+        const nickEl = document.getElementById('pfNickname');
+        if (nickTrim) {
+          nickEl.textContent = nickTrim;
+          nickEl.className = 'profile-kv__value';
+        } else {
+          nickEl.textContent = 'ยังไม่ได้ระบุ';
+          nickEl.className = 'profile-kv__value empty';
+        }
+
+        const birthRaw = m.birth_date || m.birthDate;
+        const birthEl = document.getElementById('pfBirthDate');
+        const ageEl = document.getElementById('pfAge');
+        if (birthRaw && String(birthRaw).trim()) {
+          birthEl.textContent = formatBirthDateTh(birthRaw);
+          birthEl.className = 'profile-kv__value';
+          const ag = calculateAgeYears(birthRaw);
+          if (ag != null) {
+            ageEl.textContent = ag + ' ปี';
+            ageEl.className = 'profile-kv__value';
+          } else {
+            ageEl.textContent = 'ยังไม่ได้ระบุ';
+            ageEl.className = 'profile-kv__value empty';
+          }
+        } else {
+          birthEl.textContent = 'ยังไม่ได้ระบุ';
+          birthEl.className = 'profile-kv__value empty';
+          ageEl.textContent = 'ยังไม่ได้ระบุ';
+          ageEl.className = 'profile-kv__value empty';
+        }
+
+        setField('pfExperience', m.experience);
+        setField('pfVision', m.vision);
+
+        const contactDefs = [
+          { key: 'email',     icon: emailIcon(),     label: 'อีเมล',      value: m.email,     href: safeEmail(m.email) ? 'mailto:' + safeEmail(m.email) : null,       bg: '#EA4335' },
+          { key: 'phone',     icon: phoneIcon(),     label: 'โทรศัพท์',   value: m.phone,     href: safeTel(m.phone) ? 'tel:' + safeTel(m.phone) : null,               bg: '#34A853' },
+          { key: 'line_id',   icon: lineIcon(),      label: 'LINE ID',     value: m.line_id,   href: null,                                                              bg: '#06C755' },
+          { key: 'linkedin',  icon: linkedinIcon(),  label: 'LinkedIn',    value: m.linkedin,  href: safeUrl(m.linkedin),                                            bg: '#0A66C2' },
+          { key: 'facebook',  icon: facebookIcon(),  label: 'Facebook',    value: m.facebook,  href: safeUrl(m.facebook),                                            bg: '#1877F2' },
+          { key: 'instagram', icon: instagramIcon(), label: 'Instagram',   value: m.instagram, href: safeUrl(m.instagram),                                           bg: '#E1306C' },
+          { key: 'youtube',   icon: youtubeIcon(),   label: 'YouTube',     value: m.youtube,   href: safeUrl(m.youtube),                                             bg: '#FF0000' },
+          { key: 'tiktok',    icon: tiktokIcon(),    label: 'TikTok',      value: m.tiktok,    href: safeUrl(m.tiktok),                                              bg: '#010101' },
+        ];
+
+        function hasVal(c) {
+          return c.value != null && String(c.value).trim() !== '';
+        }
+
+        function contactCardInner(c) {
+          return `
+              <div class="contact-icon" style="background:${c.bg}">${c.icon}</div>
+              <div class="profile-contact-card__body">
+                <div class="profile-contact-label">${escapeHtml(c.label)}</div>
+                <div class="contact-text">${escapeHtml(String(c.value).trim())}</div>
+              </div>`;
+        }
+
+        function contactCardWrap(c) {
+          const inner = contactCardInner(c);
+          return c.href
+            ? `<a href="${c.href}" target="_blank" rel="noopener" class="contact-item contact-item--enterprise">${inner}</a>`
+            : `<div class="contact-item contact-item--enterprise">${inner}</div>`;
+        }
+
+        const primaryOrder = ['email', 'phone', 'line_id'];
+        const primary = primaryOrder.map(k => contactDefs.find(d => d.key === k)).filter(d => d && hasVal(d));
+        const linkedin = contactDefs.find(d => d.key === 'linkedin');
+        const hasLinkedin = linkedin && hasVal(linkedin);
+        const socialOrder = ['facebook', 'instagram', 'youtube', 'tiktok'];
+        const social = socialOrder.map(k => contactDefs.find(d => d.key === k)).filter(d => d && hasVal(d));
 
         const grid = document.getElementById('contactGrid');
-        if (contacts.length) {
-          grid.innerHTML = contacts.map(c => {
-            const inner = `
-              <div class="contact-icon" style="background:${c.bg}">${c.icon}</div>
-              <div>
-                <div style="font-size:11px;color:#495057;text-transform:uppercase;font-weight:700">${escapeHtml(c.label)}</div>
-                <div class="contact-text">${escapeHtml(c.value)}</div>
-              </div>`;
-            return c.href
-              ? `<a href="${c.href}" target="_blank" rel="noopener" class="contact-item" style="text-decoration:none;color:inherit">${inner}</a>`
-              : `<div class="contact-item">${inner}</div>`;
-          }).join('');
+        const anyContact = primary.length || hasLinkedin || social.length;
+        if (!anyContact) {
+          grid.innerHTML = '<p class="profile-kv__value empty profile-kv__value--flush">ยังไม่ได้ระบุช่องทางการติดต่อ</p>';
         } else {
-          grid.innerHTML = '<p class="profile-field-value empty">ยังไม่ได้ระบุช่องทางการติดต่อ</p>';
+          let html = '';
+          if (primary.length) {
+            html += `<div class="profile-contact-primary" role="list">${primary.map(c => `<div class="profile-contact-primary__cell" role="listitem">${contactCardWrap(c)}</div>`).join('')}</div>`;
+          }
+          if (hasLinkedin) {
+            html += `<div class="profile-contact-linkedin">${contactCardWrap(linkedin)}</div>`;
+          }
+          if (social.length) {
+            html += `<div class="profile-contact-social-box" aria-label="โซเชียลมีเดีย">
+              <div class="profile-contact-social-title">โซเชียลมีเดีย</div>
+              <div class="profile-contact-social-grid" role="list">${social.map(c => `<div class="profile-contact-social__cell" role="listitem">${contactCardWrap(c)}</div>`).join('')}</div>
+            </div>`;
+          }
+          grid.innerHTML = html;
         }
 
-        // Group section
-        if (m.group_name) {
-          document.getElementById('sectionGroup').style.display = 'block';
-          const color = safeHexColor(m.group_color, '#1a2b5e');
-          document.getElementById('pfGroupInfo').innerHTML = `
-            <div class="contact-item">
-              <div class="contact-icon" style="background:${color}">🏷️</div>
-              <div>
-                <div style="font-size:11px;color:#495057;text-transform:uppercase;font-weight:700">กลุ่ม</div>
-                <div class="contact-text">${escapeHtml(m.group_name)}${m.group_name_en ? ` (${escapeHtml(m.group_name_en)})` : ''}</div>
-              </div>
-            </div>
-            ${m.is_group_leader ? '<span style="display:inline-block;margin-top:8px;background:#c9a84c20;color:#a07830;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">⭐ หัวหน้ากลุ่ม</span>' : ''}
-          `;
-        }
+        refreshProfileIcons();
 
         // Nav buttons
         const prevId = m.id - 1;

@@ -2,28 +2,39 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>กลุ่มย่อย - ทำเนียบรุ่น พศว. รุ่น 6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-  <nav class="navbar">
+<body class="groups-page">
+  <nav class="navbar" id="siteNavbar" aria-label="หลัก">
     <div class="navbar-inner">
       <a href="/" class="navbar-brand">
-        <div class="brand-icon">⚖️</div>
+        <div class="brand-icon" aria-hidden="true">
+          <span class="brand-icon__emoji">⚖️</span>
+        </div>
         <div class="brand-text">
           <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
           <div class="title-en">Senate Staff Development Program Batch 6</div>
         </div>
       </a>
-      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
-      <ul class="navbar-nav" id="navMenu">
-        <li><a href="/">👥 สมาชิก</a></li>
-        <li><a href="/officers">🏅 คณะกรรมการ</a></li>
-        <li><a href="/groups" class="active">🤝 กลุ่มย่อย</a></li>
-      </ul>
+      <div class="navbar-actions">
+        <button type="button" class="navbar-toggle" id="navToggle" aria-label="เปิดเมนู" aria-controls="navMenu" aria-expanded="false" onclick="toggleMenu(event)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" x2="20" y1="6" y2="6"/>
+            <line x1="4" x2="20" y1="12" y2="12"/>
+            <line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+        </button>
+        <ul class="navbar-nav" id="navMenu">
+          <li><a href="/">👥 สมาชิก</a></li>
+          <li><a href="/officers">🏅 คณะกรรมการ</a></li>
+          <li><a href="/groups" class="active">🤝 กลุ่มย่อย</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
 
@@ -56,9 +67,31 @@
         .replace(/'/g, '&#039;');
     }
 
+    function thaiFullnameHtml(prefix, firstName, lastName) {
+      const p = escapeHtml(String(prefix ?? '').trim());
+      const f = escapeHtml(String(firstName ?? '').trim());
+      const l = escapeHtml(String(lastName ?? '').trim());
+      return `<div class="user-fullname"><span class="name-prefix">${p}</span><span class="name-first">${f}</span> <span class="name-last">${l}</span></div>`;
+    }
+
     function safeHexColor(color, fallback) {
       const v = String(color ?? '').trim();
       return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : fallback;
+    }
+
+    /** แปลง #RRGGBB → rgba สำหรับพื้นหลังไอคอนกลุ่ม */
+    function hexToRgb(hex) {
+      let h = String(hex || '').replace('#', '').trim();
+      if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+      if (!/^[0-9a-fA-F]{6}$/.test(h)) return { r: 37, g: 99, b: 235 };
+      const n = parseInt(h, 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+
+    function groupIconSwatchStyle(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      const esc = escapeHtml(hex);
+      return `background:rgba(${r},${g},${b},0.1);color:${esc};`;
     }
 
     function safeUrl(url) {
@@ -75,80 +108,85 @@
 
       if (!groupsWithMembers.length) {
         container.innerHTML = `
-          <div class="empty-state">
+          <div class="empty-state empty-state--compact">
             <div class="icon">🤝</div>
             <p>ยังไม่มีข้อมูลกลุ่มย่อย</p>
-            <p style="font-size:13px;margin-top:8px;color:#adb5bd">Admin สามารถจัดกลุ่มสมาชิกได้ที่หน้า Admin Panel</p>
+            <p class="empty-state__hint">Admin สามารถจัดกลุ่มสมาชิกได้ที่หน้า Admin Panel</p>
           </div>
         `;
         return;
       }
 
       container.innerHTML = groups.map((g, idx) => {
-        const color = safeHexColor(g.color, '#1a2b5e');
+        const color = safeHexColor(g.color, '#2563eb');
         const groupTitle = escapeHtml(g.name_th || '');
         const groupNameEn = escapeHtml(g.name_en || '');
         const groupDesc = escapeHtml(g.description || '');
+        const subline = [groupNameEn, g.description ? groupDesc : ''].filter(Boolean).join(' · ');
 
         const leaders = g.members.filter(m => m.is_group_leader);
         const regular = g.members.filter(m => !m.is_group_leader);
+        const iconStyle = groupIconSwatchStyle(color);
 
         return `
-          <div class="group-block">
-            <div class="group-header" style="background:linear-gradient(135deg,${color},${color}cc)">
-              <div class="group-icon">${GROUP_ICONS[idx] || '🔵'}</div>
-              <div>
-                <div class="group-title">${groupTitle}</div>
-                <div class="group-subtitle">${groupNameEn} ${g.description ? '· ' + groupDesc : ''}</div>
+          <!-- กล่องกลุ่ม: กว้างเต็มพื้นที่ (width:100%) · สมาชิกใน .group-members-scroll เลื่อนแนวนอน -->
+          <article class="group-block" aria-label="กลุ่ม ${groupTitle}">
+            <header class="group-card-head">
+              <div class="group-card-head__main">
+                <div class="group-icon-swatch" style="${iconStyle}" aria-hidden="true">${GROUP_ICONS[idx] || '🔵'}</div>
+                <div class="group-card-head__text">
+                  <h2 class="group-card-title">${groupTitle}</h2>
+                  ${subline ? `<p class="group-card-subtitle">${subline}</p>` : ''}
+                </div>
               </div>
-              <div class="group-count">${escapeHtml(g.members.length)} ท่าน</div>
-            </div>
-            <div class="group-body">
+              <span class="group-count-pill">${escapeHtml(g.members.length)} ท่าน</span>
+            </header>
+            <div class="group-members-panel">
               ${leaders.length ? `
-                <div class="group-leader-section">
-                  <div class="group-leader-label">⭐ หัวหน้ากลุ่ม</div>
-                  <div class="group-members-grid">
-                    ${leaders.map(m => memberCard(m, true, color)).join('')}
+                <div class="group-members-chunk">
+                  <div class="group-members-chunk__label">⭐ หัวหน้ากลุ่ม</div>
+                  <!-- เลื่อนแนวนอนเมื่อมีหลายคน — การ์ดยังเป็น .member-card แบบหน้าแรก -->
+                  <div class="group-members-scroll" role="list">
+                    ${leaders.map((m) => memberTile(m, true)).join('')}
                   </div>
                 </div>
               ` : ''}
               ${regular.length ? `
-                <div>
-                  <div class="group-leader-label" style="color:#495057">👥 สมาชิก</div>
-                  <div class="group-members-grid">
-                    ${regular.map(m => memberCard(m, false, color)).join('')}
+                <div class="group-members-chunk">
+                  <div class="group-members-chunk__label group-members-chunk__label--muted">👥 สมาชิก</div>
+                  <div class="group-members-scroll" role="list">
+                    ${regular.map((m) => memberTile(m, false)).join('')}
                   </div>
                 </div>
               ` : ''}
             </div>
-          </div>
+          </article>
         `;
       }).join('');
     }
 
-    function memberCard(m, isLeader, color) {
-      const prefix = escapeHtml(m.prefix || '');
-      const first = escapeHtml(m.first_name || '');
-      const last = escapeHtml(m.last_name || '');
-      const name = `${prefix}${first} ${last}`;
+    /** การ์ดสมาชิก — คลาสเดียวกับหน้าแรก (memberCardHtml) ไม่มี modifier พิเศษ */
+    function memberTile(m, isLeader) {
       const photoUrl = safeUrl(m.photo);
-      const positionText = isLeader
-        ? '⭐ หัวหน้ากลุ่ม'
-        : (m.position
-            ? (m.position.length > 30 ? m.position.substring(0, 30) + '...' : m.position)
-            : ''
-          );
-      const positionEscaped = escapeHtml(positionText);
+      const first = escapeHtml(m.first_name || '');
+      const nickname = escapeHtml(m.nickname || '');
+      const nameHtml = thaiFullnameHtml(m.prefix, m.first_name, m.last_name);
+      const num = escapeHtml(String(m.number ?? ''));
+      const positionRaw = isLeader
+        ? (String(m.position || '').trim() || 'หัวหน้ากลุ่ม')
+        : String(m.position || '').trim();
+      const positionEscaped = escapeHtml(positionRaw);
+
+      const avatarHtml = photoUrl
+        ? `<div class="member-avatar"><img src="${photoUrl}" alt="${first}" onerror="var w=this.parentElement;w.classList.add('member-avatar--fallback');w.innerHTML='<span class=\\'member-avatar__emoji\\' aria-hidden=\\'true\\'>⚖️</span>';"></div>`
+        : `<div class="member-avatar member-avatar--fallback" aria-hidden="true"><span class="member-avatar__emoji">⚖️</span></div>`;
 
       return `
-        <a href="/member/${m.id}" class="group-member-card ${isLeader ? 'leader' : ''}">
-          <div class="group-member-avatar ${isLeader ? 'leader' : ''}" style="${isLeader ? 'border-color:'+color : ''}">
-            ${photoUrl ? `<img src="${photoUrl}" alt="${first}" onerror="this.parentElement.textContent='👤'">` : '👤'}
-          </div>
-          <div class="group-member-info">
-            <div class="name">${name}</div>
-            <div class="role">${positionEscaped}</div>
-          </div>
+        <a href="/member/${m.id}" class="member-card" role="listitem">
+          <span class="member-number">ลำดับที่ ${num}</span>
+          ${avatarHtml}
+          <div class="member-card-name">${nameHtml}${m.nickname ? `<span class="member-card-nickname">(${nickname})</span>` : ''}</div>
+          <p class="member-card-position">${positionEscaped || '\u00A0'}</p>
         </a>
       `;
     }
