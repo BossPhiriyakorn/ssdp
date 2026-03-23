@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - ทำเนียบรุ่น พศว. รุ่น 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">
+          <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
+          <div class="title-en">Senate Staff Development Program Batch 6</div>
+        </div>
+      </a>
+      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+      <ul class="navbar-nav" id="navMenu">
+        <li><a href="/">👥 สมาชิก</a></li>
+        <li><a href="/officers">🏅 คณะกรรมการ</a></li>
+        <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="loadingState" class="loading" style="min-height:60vh">
+    <div class="spinner"></div><span>กำลังโหลดข้อมูล...</span>
+  </div>
+
+  <div id="profileContent" style="display:none">
+    <div class="profile-page">
+      <a href="/" class="back-btn">← กลับสู่รายชื่อสมาชิก</a>
+
+      <div class="profile-card">
+        <!-- Header -->
+        <div class="profile-header">
+          <div class="profile-photo-wrap">
+            <div class="profile-photo" id="profilePhoto">👤</div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-number" id="profileNumber"></div>
+            <div class="profile-name" id="profileName"></div>
+            <div class="profile-position" id="profilePosition"></div>
+            <div class="profile-org" id="profileOrg"></div>
+            <div id="profileGroupBadge"></div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="profile-body">
+          <!-- Professional Info -->
+          <div class="profile-section">
+            <div class="profile-section-title">💼 ข้อมูลการทำงาน</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="profile-field">
+                <div class="profile-field-label">ตำแหน่ง</div>
+                <div class="profile-field-value" id="pfPosition"></div>
+              </div>
+              <div class="profile-field">
+                <div class="profile-field-label">หน่วยงาน / สังกัด</div>
+                <div class="profile-field-value" id="pfOrganization"></div>
+              </div>
+              <div class="profile-field">
+                <div class="profile-field-label">กรม / ฝ่าย</div>
+                <div class="profile-field-value" id="pfDepartment"></div>
+              </div>
+              <div class="profile-field">
+                <div class="profile-field-label">ความเชี่ยวชาญ</div>
+                <div class="profile-field-value" id="pfExpertise"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Education -->
+          <div class="profile-section" id="sectionEducation">
+            <div class="profile-section-title">🎓 ประวัติการศึกษา</div>
+            <div class="profile-field-value" id="pfEducation"></div>
+          </div>
+
+          <!-- Experience -->
+          <div class="profile-section" id="sectionExperience">
+            <div class="profile-section-title">📋 ประสบการณ์สำคัญ</div>
+            <div class="profile-field-value" id="pfExperience"></div>
+          </div>
+
+          <!-- Vision -->
+          <div class="profile-section" id="sectionVision">
+            <div class="profile-section-title">🌟 วิสัยทัศน์ / บทบาทในรุ่น</div>
+            <div class="profile-field-value" id="pfVision"></div>
+          </div>
+
+          <!-- Contact -->
+          <div class="profile-section">
+            <div class="profile-section-title">📞 ช่องทางการติดต่อ</div>
+            <div class="contact-grid" id="contactGrid"></div>
+          </div>
+
+          <!-- Group Info -->
+          <div class="profile-section" id="sectionGroup" style="display:none">
+            <div class="profile-section-title">🏷️ กลุ่มย่อย</div>
+            <div id="pfGroupInfo"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;justify-content:space-between;margin-top:20px;gap:12px;flex-wrap:wrap">
+        <div id="prevBtn"></div>
+        <div id="nextBtn"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>ทำเนียบรุ่น <span>พศว. รุ่น 6</span> | สำนักงานเลขาธิการวุฒิสภา</p>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const memberId = window.location.pathname.split('/').pop();
+
+    function setField(id, value, sectionId) {
+      const el = document.getElementById(id);
+      if (value && value.trim()) {
+        el.textContent = value;
+        el.className = 'profile-field-value';
+      } else {
+        el.textContent = 'ยังไม่ได้ระบุ';
+        el.className = 'profile-field-value empty';
+        if (sectionId) document.getElementById(sectionId).style.display = 'none';
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function safeHexColor(color, fallback) {
+      const v = String(color ?? '').trim();
+      return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : fallback;
+    }
+
+    function safeUrl(url) {
+      if (typeof url !== 'string') return null;
+      const v = url.trim();
+      return /^https?:\/\//i.test(v) ? v : null;
+    }
+
+    function safeEmail(email) {
+      if (typeof email !== 'string') return null;
+      const v = email.trim();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? v : null;
+    }
+
+    function safeTel(phone) {
+      if (typeof phone !== 'string') return null;
+      const digits = phone.replace(/[^\d]/g, '');
+      return digits.length >= 7 ? digits : null;
+    }
+
+    async function loadMember() {
+      try {
+        const m = await fetch(`/api/members/${memberId}`).then(r => r.json());
+        document.title = `${m.prefix}${m.first_name} ${m.last_name} - ทำเนียบรุ่น พศว. รุ่น 6`;
+
+        // Header
+        document.getElementById('profileNumber').textContent = `ลำดับที่ ${m.number}`;
+        const nickname = m.nickname ? ` (${m.nickname})` : '';
+        document.getElementById('profileName').textContent = `${m.prefix || ''}${m.first_name} ${m.last_name}${nickname}`;
+        document.getElementById('profilePosition').textContent = m.position || '';
+        document.getElementById('profileOrg').textContent = m.organization || '';
+
+        // Photo
+        const photoEl = document.getElementById('profilePhoto');
+        const photoUrl = safeUrl(m.photo);
+        if (photoUrl) {
+          const img = document.createElement('img');
+          img.src = photoUrl;
+          img.alt = m.first_name || '';
+          img.onerror = () => { photoEl.textContent = '👤'; };
+          photoEl.innerHTML = '';
+          photoEl.appendChild(img);
+        }
+
+        // Group badge
+        if (m.group_name) {
+          const color = safeHexColor(m.group_color, '#1a2b5e');
+          const badge = document.createElement('div');
+          badge.className = 'profile-group-badge';
+          badge.style.background = `${color}40`;
+          badge.textContent = `🏷️ ${m.group_name}${m.is_group_leader ? ' · หัวหน้ากลุ่ม' : ''}`;
+          const el = document.getElementById('profileGroupBadge');
+          el.innerHTML = '';
+          el.appendChild(badge);
+        }
+
+        // Fields
+        setField('pfPosition', m.position);
+        setField('pfOrganization', m.organization);
+        setField('pfDepartment', m.department);
+        setField('pfExpertise', m.expertise);
+        setField('pfEducation', m.education, 'sectionEducation');
+        setField('pfExperience', m.experience, 'sectionExperience');
+        setField('pfVision', m.vision, 'sectionVision');
+
+        // Contact & Social Media
+        const contacts = [
+          { key: 'email',     icon: emailIcon(),     label: 'อีเมล',      value: m.email,     href: safeEmail(m.email) ? 'mailto:'+safeEmail(m.email) : null,       bg: '#EA4335' },
+          { key: 'phone',     icon: phoneIcon(),     label: 'โทรศัพท์',   value: m.phone,     href: safeTel(m.phone) ? 'tel:'+safeTel(m.phone) : null, bg: '#34A853' },
+          { key: 'line_id',   icon: lineIcon(),      label: 'LINE ID',     value: m.line_id,   href: null,                                     bg: '#06C755' },
+          { key: 'linkedin',  icon: linkedinIcon(),  label: 'LinkedIn',    value: m.linkedin,  href: safeUrl(m.linkedin),                               bg: '#0A66C2' },
+          { key: 'facebook',  icon: facebookIcon(),  label: 'Facebook',    value: m.facebook,  href: safeUrl(m.facebook),                               bg: '#1877F2' },
+          { key: 'instagram', icon: instagramIcon(), label: 'Instagram',   value: m.instagram, href: safeUrl(m.instagram),                              bg: '#E1306C' },
+          { key: 'youtube',   icon: youtubeIcon(),   label: 'YouTube',     value: m.youtube,   href: safeUrl(m.youtube),                                bg: '#FF0000' },
+          { key: 'tiktok',    icon: tiktokIcon(),    label: 'TikTok',      value: m.tiktok,    href: safeUrl(m.tiktok),                                 bg: '#010101' },
+        ].filter(c => c.value);
+
+        const grid = document.getElementById('contactGrid');
+        if (contacts.length) {
+          grid.innerHTML = contacts.map(c => {
+            const inner = `
+              <div class="contact-icon" style="background:${c.bg}">${c.icon}</div>
+              <div>
+                <div style="font-size:10px;color:#adb5bd;text-transform:uppercase;font-weight:600">${escapeHtml(c.label)}</div>
+                <div class="contact-text">${escapeHtml(c.value)}</div>
+              </div>`;
+            return c.href
+              ? `<a href="${c.href}" target="_blank" rel="noopener" class="contact-item" style="text-decoration:none;color:inherit">${inner}</a>`
+              : `<div class="contact-item">${inner}</div>`;
+          }).join('');
+        } else {
+          grid.innerHTML = '<p class="profile-field-value empty">ยังไม่ได้ระบุช่องทางการติดต่อ</p>';
+        }
+
+        // Group section
+        if (m.group_name) {
+          document.getElementById('sectionGroup').style.display = 'block';
+          const color = safeHexColor(m.group_color, '#1a2b5e');
+          document.getElementById('pfGroupInfo').innerHTML = `
+            <div class="contact-item">
+              <div class="contact-icon" style="background:${color}">🏷️</div>
+              <div>
+                <div style="font-size:10px;color:#adb5bd;text-transform:uppercase;font-weight:600">กลุ่ม</div>
+                <div class="contact-text">${escapeHtml(m.group_name)}${m.group_name_en ? ` (${escapeHtml(m.group_name_en)})` : ''}</div>
+              </div>
+            </div>
+            ${m.is_group_leader ? '<span style="display:inline-block;margin-top:8px;background:#c9a84c20;color:#a07830;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">⭐ หัวหน้ากลุ่ม</span>' : ''}
+          `;
+        }
+
+        // Nav buttons
+        const prevId = m.id - 1;
+        const nextId = m.id + 1;
+        document.getElementById('prevBtn').innerHTML = prevId > 0
+          ? `<a href="/member/${prevId}" class="back-btn">← สมาชิกก่อนหน้า</a>` : '';
+        document.getElementById('nextBtn').innerHTML =
+          `<a href="/member/${nextId}" class="back-btn" onclick="return checkNext(${nextId}, event)">สมาชิกถัดไป →</a>`;
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('profileContent').style.display = 'block';
+      } catch(e) {
+        document.getElementById('loadingState').innerHTML = '<p style="color:red;padding:40px">ไม่พบข้อมูลสมาชิก</p>';
+      }
+    }
+
+    async function checkNext(id, e) {
+      const r = await fetch(`/api/members/${id}`);
+      if (!r.ok) { e.preventDefault(); alert('ไม่มีสมาชิกถัดไปแล้ว'); return false; }
+      return true;
+    }
+
+    // ===== Social Media Icon SVGs =====
+    function emailIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`; }
+    function phoneIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>`; }
+    function lineIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.952 12.258c0-4.344-4.354-7.876-9.707-7.876S.538 7.914.538 12.258c0 3.893 3.453 7.155 8.118 7.773.316.068.746.208.855.478.098.245.064.63.031.878l-.138.83c-.042.245-.194.958.839.522 1.033-.436 5.573-3.281 7.605-5.616C19.348 15.413 19.952 13.902 19.952 12.258z"/></svg>`; }
+    function linkedinIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>`; }
+    function facebookIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`; }
+    function instagramIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>`; }
+    function youtubeIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`; }
+    function tiktokIcon() { return `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>`; }
+
+    loadMember();
+  </script>
+</body>
+</html>

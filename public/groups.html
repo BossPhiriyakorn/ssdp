@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>กลุ่มย่อย - ทำเนียบรุ่น พศว. รุ่น 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">
+          <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
+          <div class="title-en">Senate Staff Development Program Batch 6</div>
+        </div>
+      </a>
+      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+      <ul class="navbar-nav" id="navMenu">
+        <li><a href="/">👥 สมาชิก</a></li>
+        <li><a href="/officers">🏅 คณะกรรมการ</a></li>
+        <li><a href="/groups" class="active">🤝 กลุ่มย่อย</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>🤝 กลุ่มย่อยในรุ่น</h1>
+    <p>Small Groups - พศว. รุ่น 6</p>
+  </div>
+
+  <div class="container">
+    <div class="groups-section" id="groupsContent">
+      <div class="loading"><div class="spinner"></div><span>กำลังโหลดข้อมูล...</span></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>ทำเนียบรุ่น <span>พศว. รุ่น 6</span> | สำนักงานเลขาธิการวุฒิสภา</p>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const GROUP_ICONS = ['🌟', '🔵', '🟢', '🔴', '🟡'];
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function safeHexColor(color, fallback) {
+      const v = String(color ?? '').trim();
+      return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : fallback;
+    }
+
+    function safeUrl(url) {
+      if (typeof url !== 'string') return null;
+      const v = url.trim();
+      return /^https?:\/\//i.test(v) ? v : null;
+    }
+
+    async function loadGroups() {
+      const groups = await fetch('/api/groups').then(r => r.json());
+      const container = document.getElementById('groupsContent');
+
+      const groupsWithMembers = groups.filter(g => g.members && g.members.length > 0);
+
+      if (!groupsWithMembers.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🤝</div>
+            <p>ยังไม่มีข้อมูลกลุ่มย่อย</p>
+            <p style="font-size:13px;margin-top:8px;color:#adb5bd">Admin สามารถจัดกลุ่มสมาชิกได้ที่หน้า Admin Panel</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = groups.map((g, idx) => {
+        const color = safeHexColor(g.color, '#1a2b5e');
+        const groupTitle = escapeHtml(g.name_th || '');
+        const groupNameEn = escapeHtml(g.name_en || '');
+        const groupDesc = escapeHtml(g.description || '');
+
+        const leaders = g.members.filter(m => m.is_group_leader);
+        const regular = g.members.filter(m => !m.is_group_leader);
+
+        return `
+          <div class="group-block">
+            <div class="group-header" style="background:linear-gradient(135deg,${color},${color}cc)">
+              <div class="group-icon">${GROUP_ICONS[idx] || '🔵'}</div>
+              <div>
+                <div class="group-title">${groupTitle}</div>
+                <div class="group-subtitle">${groupNameEn} ${g.description ? '· ' + groupDesc : ''}</div>
+              </div>
+              <div class="group-count">${escapeHtml(g.members.length)} ท่าน</div>
+            </div>
+            <div class="group-body">
+              ${leaders.length ? `
+                <div class="group-leader-section">
+                  <div class="group-leader-label">⭐ หัวหน้ากลุ่ม</div>
+                  <div class="group-members-grid">
+                    ${leaders.map(m => memberCard(m, true, color)).join('')}
+                  </div>
+                </div>
+              ` : ''}
+              ${regular.length ? `
+                <div>
+                  <div class="group-leader-label" style="color:#495057">👥 สมาชิก</div>
+                  <div class="group-members-grid">
+                    ${regular.map(m => memberCard(m, false, color)).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function memberCard(m, isLeader, color) {
+      const prefix = escapeHtml(m.prefix || '');
+      const first = escapeHtml(m.first_name || '');
+      const last = escapeHtml(m.last_name || '');
+      const name = `${prefix}${first} ${last}`;
+      const photoUrl = safeUrl(m.photo);
+      const positionText = isLeader
+        ? '⭐ หัวหน้ากลุ่ม'
+        : (m.position
+            ? (m.position.length > 30 ? m.position.substring(0, 30) + '...' : m.position)
+            : ''
+          );
+      const positionEscaped = escapeHtml(positionText);
+
+      return `
+        <a href="/member/${m.id}" class="group-member-card ${isLeader ? 'leader' : ''}">
+          <div class="group-member-avatar ${isLeader ? 'leader' : ''}" style="${isLeader ? 'border-color:'+color : ''}">
+            ${photoUrl ? `<img src="${photoUrl}" alt="${first}" onerror="this.parentElement.textContent='👤'">` : '👤'}
+          </div>
+          <div class="group-member-info">
+            <div class="name">${name}</div>
+            <div class="role">${positionEscaped}</div>
+          </div>
+        </a>
+      `;
+    }
+
+    loadGroups();
+  </script>
+</body>
+</html>

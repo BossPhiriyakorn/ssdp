@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คณะกรรมการรุ่น - ทำเนียบรุ่น พศว. รุ่น 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">
+          <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
+          <div class="title-en">Senate Staff Development Program Batch 6</div>
+        </div>
+      </a>
+      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+      <ul class="navbar-nav" id="navMenu">
+        <li><a href="/">👥 สมาชิก</a></li>
+        <li><a href="/officers" class="active">🏅 คณะกรรมการ</a></li>
+        <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>🏅 คณะกรรมการในรุ่น</h1>
+    <p>Class Officers - พศว. รุ่น 6</p>
+  </div>
+
+  <div id="mainContent">
+    <div class="loading"><div class="spinner"></div><span>กำลังโหลดข้อมูล...</span></div>
+  </div>
+
+  <footer class="footer">
+    <p>ทำเนียบรุ่น <span>พศว. รุ่น 6</span> | สำนักงานเลขาธิการวุฒิสภา</p>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const ROLE_ORDER = [
+      { key: 'president', label: 'ตำแหน่งประธาน', roles: ['ประธานรุ่น'] },
+      { key: 'vp', label: 'รองประธานรุ่น', roles: ['รองประธานรุ่น 1', 'รองประธานรุ่น 2', 'รองประธานรุ่น 3', 'รองประธานรุ่น 4'] },
+      { key: 'other', label: 'คณะกรรมการรุ่น', roles: [] },
+    ];
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function safeUrl(url) {
+      if (typeof url !== 'string') return null;
+      const v = url.trim();
+      return /^https?:\/\//i.test(v) ? v : null;
+    }
+
+    async function loadOfficers() {
+      const officers = await fetch('/api/officers').then(r => r.json());
+
+      if (!officers.length) {
+        document.getElementById('mainContent').innerHTML = `
+          <div class="container">
+            <div class="empty-state" style="padding:80px 24px">
+              <div class="icon">🏅</div>
+              <p>ยังไม่มีข้อมูลคณะกรรมการรุ่น</p>
+              <p style="font-size:13px;margin-top:8px;color:#adb5bd">Admin สามารถเพิ่มข้อมูลได้ที่หน้า Admin Panel</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const president = officers.filter(o => o.role_th === 'ประธานรุ่น');
+      const vps = officers.filter(o => o.role_th.startsWith('รองประธาน'));
+      const others = officers.filter(o => o.role_th !== 'ประธานรุ่น' && !o.role_th.startsWith('รองประธาน'));
+
+      let html = '<div class="container"><div class="officers-section">';
+
+      // President
+      if (president.length) {
+        html += `<div style="margin-bottom:36px">
+          <div class="officer-section-title">👑 ประธานรุ่น</div>
+          <div style="display:flex;justify-content:center">
+            ${president.map(o => officerCard(o, true)).join('')}
+          </div>
+        </div>`;
+      }
+
+      // VPs
+      if (vps.length) {
+        html += `<div style="margin-bottom:36px">
+          <div class="officer-section-title">⭐ รองประธานรุ่น</div>
+          <div class="officer-vp-row">
+            ${vps.map(o => officerCard(o, false)).join('')}
+          </div>
+        </div>`;
+      }
+
+      // Others
+      if (others.length) {
+        html += `<div style="margin-bottom:36px">
+          <div class="officer-section-title">🏅 คณะกรรมการรุ่น</div>
+          <div class="other-officers-grid">
+            ${others.map(o => officerCard(o, false)).join('')}
+          </div>
+        </div>`;
+      }
+
+      html += '</div></div>';
+      document.getElementById('mainContent').innerHTML = html;
+    }
+
+    function officerCard(o, isPresident) {
+      const prefix = escapeHtml(o.prefix || '');
+      const first = escapeHtml(o.first_name || '');
+      const last = escapeHtml(o.last_name || '');
+      const name = `${prefix}${first} ${last}`;
+      const photoUrl = safeUrl(o.photo);
+      const roleTh = escapeHtml(o.role_th || '');
+      const position = escapeHtml(o.position || '');
+
+      const photoHtml = photoUrl
+        ? `<div class="${isPresident ? 'officer-photo' : 'officer-photo'}" style="width:${isPresident?'120px':'90px'};height:${isPresident?'120px':'90px'}"><img src="${photoUrl}" alt="${first}" onerror="this.parentElement.textContent='👤'"></div>`
+        : `<div class="officer-photo" style="width:${isPresident?'120px':'90px'};height:${isPresident?'120px':'90px'};font-size:${isPresident?'44px':'32px'}">👤</div>`;
+
+      return `
+        <a href="/member/${o.member_id}" class="officer-card ${isPresident ? 'president' : ''}" style="max-width:${isPresident?'300px':'220px'}">
+          <div class="card-top">
+            <div class="officer-role-badge">${roleTh}</div>
+            ${photoHtml}
+            <div class="officer-name">${name}</div>
+          </div>
+          <div class="officer-card-body">
+            <div class="officer-position">${position}</div>
+          </div>
+        </a>
+      `;
+    }
+
+    loadOfficers();
+  </script>
+</body>
+</html>

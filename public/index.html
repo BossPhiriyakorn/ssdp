@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทำเนียบรุ่น พศว. รุ่น 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">
+          <div class="title-th">ทำเนียบรุ่น พศว. รุ่น 6</div>
+          <div class="title-en">Senate Staff Development Program Batch 6</div>
+        </div>
+      </a>
+      <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+      <ul class="navbar-nav" id="navMenu">
+        <li><a href="/" class="active">👥 สมาชิก</a></li>
+        <li><a href="/officers">🏅 คณะกรรมการ</a></li>
+        <li><a href="/groups">🤝 กลุ่มย่อย</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-emblem">⚖️</div>
+    <h1 id="heroTitle">ทำเนียบรุ่น พศว. รุ่น 6</h1>
+    <h2 id="heroSubtitle">โครงการพัฒนาศักยภาพผู้ปฏิบัติงานของสมาชิกวุฒิสภา รุ่นที่ 6</h2>
+    <p id="heroYear">ประจำปีงบประมาณ พ.ศ. 2569</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="number" id="totalCount">108</span>
+        <div class="label">สมาชิกทั้งหมด</div>
+      </div>
+      <div class="hero-stat">
+        <span class="number">5</span>
+        <div class="label">กลุ่มย่อย</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <section class="search-section">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="ค้นหาชื่อหรือตำแหน่ง..." oninput="filterMembers()">
+    </div>
+  </section>
+
+  <!-- Members -->
+  <div class="container">
+    <div class="members-section">
+      <p class="members-count" id="membersCount">กำลังโหลด...</p>
+      <div class="members-grid" id="membersGrid">
+        <div class="loading"><div class="spinner"></div><span>กำลังโหลดข้อมูล...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>ทำเนียบรุ่น <span>พศว. รุ่น 6</span> | โครงการพัฒนาศักยภาพผู้ปฏิบัติงานของสมาชิกวุฒิสภา</p>
+    <p style="margin-top:4px">สำนักงานเลขาธิการวุฒิสภา</p>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let allMembers = [];
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function safeHexColor(color, fallback) {
+      const v = String(color ?? '').trim();
+      return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : fallback;
+    }
+
+    function safeUrl(url) {
+      if (typeof url !== 'string') return null;
+      const v = url.trim();
+      // แหล่งรูปจาก Supabase ควรเป็น http/https
+      return /^https?:\/\//i.test(v) ? v : null;
+    }
+
+    async function loadSettings() {
+      try {
+        const s = await fetch('/api/settings').then(r => r.json());
+        if (s.site_title_th) document.getElementById('heroTitle').textContent = s.site_title_th;
+        if (s.course_name_th) document.getElementById('heroSubtitle').textContent = s.course_name_th;
+        if (s.fiscal_year) document.getElementById('heroYear').textContent = 'ประจำปีงบประมาณ ' + s.fiscal_year;
+        document.title = s.site_title_th || 'ทำเนียบรุ่น พศว. รุ่น 6';
+      } catch(e) {}
+    }
+
+    async function loadMembers() {
+      try {
+        allMembers = await fetch('/api/members').then(r => r.json());
+        document.getElementById('totalCount').textContent = allMembers.length;
+        renderMembers(allMembers);
+      } catch(e) {
+        document.getElementById('membersGrid').innerHTML = '<p style="color:red;padding:20px">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+      }
+    }
+
+    function renderMembers(members) {
+      const grid = document.getElementById('membersGrid');
+      document.getElementById('membersCount').textContent = `แสดง ${members.length} รายการ จากทั้งหมด ${allMembers.length} ท่าน`;
+      if (!members.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>ไม่พบสมาชิกที่ค้นหา</p></div>`;
+        return;
+      }
+      grid.innerHTML = members.map(m => {
+        const photoUrl = safeUrl(m.photo);
+        const color = safeHexColor(m.group_color, '#1a2b5e');
+        const prefix = escapeHtml(m.prefix || '');
+        const first = escapeHtml(m.first_name || '');
+        const last = escapeHtml(m.last_name || '');
+        const nickname = escapeHtml(m.nickname || '');
+        const position = escapeHtml(m.position || '');
+        const groupName = escapeHtml(m.group_name || '');
+
+        return `
+          <a href="/member/${m.id}" class="member-card">
+            <div class="member-card-top">
+              <div class="member-number">ลำดับที่ ${escapeHtml(m.number)}</div>
+              ${photoUrl
+                ? `<div class="member-avatar"><img src="${photoUrl}" alt="${first}" onerror="this.parentElement.innerHTML='<div style=\\'font-size:28px;color:#e8c96a\\'>👤</div>'"></div>`
+                : `<div class="member-avatar-placeholder">👤</div>`
+              }
+              <div class="member-card-name">${prefix}${first} ${last}${m.nickname ? `<span class="member-card-nickname">(${nickname})</span>` : ''}</div>
+            </div>
+            <div class="member-card-body">
+              <div class="member-card-position">${position}</div>
+              ${m.group_name ? `<span class="member-card-badge" style="background:${color}20;color:${color}">🏷️ ${groupName}</span>` : ''}
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function filterMembers() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!q) { renderMembers(allMembers); return; }
+      const filtered = allMembers.filter(m =>
+        `${m.prefix}${m.first_name} ${m.last_name}`.toLowerCase().includes(q) ||
+        (m.nickname || '').toLowerCase().includes(q) ||
+        (m.position || '').toLowerCase().includes(q) ||
+        (m.organization || '').toLowerCase().includes(q)
+      );
+      renderMembers(filtered);
+    }
+
+    loadSettings();
+    loadMembers();
+  </script>
+</body>
+</html>

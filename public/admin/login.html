@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - ทำเนียบรุ่น พศว. รุ่น 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: linear-gradient(135deg, #091540 0%, #0d1f4f 50%, #1a3272 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-card { background: white; border-radius: 20px; padding: 48px 40px; max-width: 420px; width: 100%; margin: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo .icon { font-size: 52px; display: block; margin-bottom: 10px; }
+    .login-logo h1 { font-size: 20px; font-weight: 800; color: #0d1f4f; }
+    .login-logo p { font-size: 13px; color: #adb5bd; margin-top: 4px; }
+    .login-divider { border: none; border-top: 2px solid #e9ecef; margin: 24px 0; }
+    .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #0d1f4f, #1a3272); color: white; border: none; border-radius: 10px; font-size: 15px; font-family: 'Sarabun', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+    .login-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,31,79,0.3); }
+    .error-msg { background: #f8d7da; color: #721c24; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .back-link { text-align: center; margin-top: 20px; }
+    .back-link a { font-size: 13px; color: #6c757d; text-decoration: none; }
+    .back-link a:hover { color: #0d1f4f; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="icon">⚖️</span>
+      <h1>ระบบจัดการข้อมูล</h1>
+      <p>Admin Panel · ทำเนียบรุ่น พศว. รุ่น 6</p>
+    </div>
+    <hr class="login-divider">
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="form-group">
+      <label class="form-label">ชื่อผู้ใช้งาน</label>
+      <input type="text" id="username" class="form-control" placeholder="username" value="admin" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="password" class="form-control" placeholder="password" autocomplete="current-password" onkeypress="if(event.key==='Enter')login()">
+    </div>
+    <button class="login-btn" onclick="login()">🔐 เข้าสู่ระบบ</button>
+    <div class="back-link"><a href="/">← กลับสู่หน้าหลัก</a></div>
+  </div>
+
+  <script>
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('errorMsg');
+      errEl.style.display = 'none';
+      try {
+        const r = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await r.json();
+        if (r.ok) { window.location.href = '/admin'; }
+        else { errEl.textContent = data.error; errEl.style.display = 'block'; }
+      } catch(e) {
+        errEl.textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+        errEl.style.display = 'block';
+      }
+    }
+
+    // Check if already logged in
+    fetch('/api/admin/check').then(r => r.json()).then(d => {
+      if (d.loggedIn) window.location.href = '/admin';
+    });
+  </script>
+</body>
+</html>

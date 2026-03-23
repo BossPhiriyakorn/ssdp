@@ -1,0 +1,40 @@
+[build]
+  command   = "npm install"
+  publish   = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# ส่ง API ทุก request ไปที่ serverless function พร้อมกับ path (:splat)
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/api/:splat"
+  status = 200
+  force  = true
+
+# SPA-style routing สำหรับหน้า member profile
+[[redirects]]
+  from   = "/member/*"
+  to     = "/member.html"
+  status = 200
+
+[[redirects]]
+  from   = "/officers"
+  to     = "/officers.html"
+  status = 200
+
+[[redirects]]
+  from   = "/groups"
+  to     = "/groups.html"
+  status = 200
+
+[[redirects]]
+  from   = "/admin"
+  to     = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/admin/login"
+  to     = "/admin/login.html"
+  status = 200

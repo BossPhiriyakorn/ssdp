@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - ทำเนียบรุ่น พศว. รุ่น 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="admin-sidebar-header">
+      <h3>⚙️ Admin Panel</h3>
+      <p id="adminUsername">กำลังโหลด...</p>
+    </div>
+    <nav class="admin-nav">
+      <a href="#" onclick="showSection('dashboard')" class="active" id="nav-dashboard"><span class="nav-icon">📊</span> แดชบอร์ด</a>
+      <a href="#" onclick="showSection('members')" id="nav-members"><span class="nav-icon">👥</span> จัดการสมาชิก</a>
+      <a href="#" onclick="showSection('officers')" id="nav-officers"><span class="nav-icon">🏅</span> คณะกรรมการรุ่น</a>
+      <a href="#" onclick="showSection('groups')" id="nav-groups"><span class="nav-icon">🤝</span> กลุ่มย่อย</a>
+      <a href="#" onclick="showSection('settings')" id="nav-settings"><span class="nav-icon">⚙️</span> ตั้งค่าเว็บไซต์</a>
+      <a href="#" onclick="showSection('password')" id="nav-password"><span class="nav-icon">🔐</span> เปลี่ยนรหัสผ่าน</a>
+      <a href="/" target="_blank"><span class="nav-icon">🌐</span> ดูเว็บไซต์</a>
+      <a href="#" onclick="logout()" style="margin-top:auto;color:#ff6b6b"><span class="nav-icon">🚪</span> ออกจากระบบ</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-content">
+    <div class="admin-topbar">
+      <button onclick="document.getElementById('adminSidebar').classList.toggle('open')" style="background:none;border:none;cursor:pointer;font-size:20px;display:none" id="sidebarToggle">☰</button>
+      <h2 id="pageTitle">แดชบอร์ด</h2>
+      <div id="topbarActions"></div>
+    </div>
+
+    <div class="admin-main" id="adminMain">
+      <div class="loading"><div class="spinner"></div><span>กำลังโหลด...</span></div>
+    </div>
+  </main>
+</div>
+
+<!-- Member Modal -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="memberModalTitle">เพิ่มสมาชิก</h3>
+      <button class="modal-close" onclick="closeModal('memberModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="memberModalAlert"></div>
+      <input type="hidden" id="memberId">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">ลำดับที่</label>
+          <input type="number" id="mNumber" class="form-control" placeholder="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">คำนำหน้า</label>
+          <input type="text" id="mPrefix" class="form-control" placeholder="นาย / นาง / นางสาว">
+        </div>
+        <div class="form-group">
+          <label class="form-label">กลุ่ม</label>
+          <select id="mGroupId" class="form-control"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ชื่อ *</label>
+          <input type="text" id="mFirstName" class="form-control" placeholder="ชื่อ">
+        </div>
+        <div class="form-group">
+          <label class="form-label">นามสกุล *</label>
+          <input type="text" id="mLastName" class="form-control" placeholder="นามสกุล">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อเล่น <span style="color:#adb5bd;font-weight:400">(แสดงในวงเล็บหลังชื่อ)</span></label>
+        <input type="text" id="mNickname" class="form-control" placeholder="เช่น ต้น, โบ, แนน">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ตำแหน่งปัจจุบัน</label>
+        <input type="text" id="mPosition" class="form-control" placeholder="ตำแหน่งในวุฒิสภา">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">หน่วยงาน / สังกัด</label>
+          <input type="text" id="mOrganization" class="form-control" placeholder="เช่น วุฒิสภา">
+        </div>
+        <div class="form-group">
+          <label class="form-label">กรม / ฝ่าย</label>
+          <input type="text" id="mDepartment" class="form-control" placeholder="ฝ่ายที่สังกัด">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ความเชี่ยวชาญ</label>
+        <input type="text" id="mExpertise" class="form-control" placeholder="สาขาความเชี่ยวชาญ">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ประวัติการศึกษา</label>
+        <textarea id="mEducation" class="form-control" placeholder="ระดับการศึกษา สถาบัน..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ประสบการณ์สำคัญ</label>
+        <textarea id="mExperience" class="form-control" placeholder="ประสบการณ์การทำงานที่สำคัญ..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">วิสัยทัศน์ / บทบาทในรุ่น</label>
+        <textarea id="mVision" class="form-control" placeholder="วิสัยทัศน์หรือสิ่งที่ต้องการบรรลุในหลักสูตรนี้..."></textarea>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">อีเมล</label>
+          <input type="email" id="mEmail" class="form-control" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">โทรศัพท์</label>
+          <input type="text" id="mPhone" class="form-control" placeholder="08X-XXX-XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">LINE ID</label>
+          <input type="text" id="mLineId" class="form-control" placeholder="LINE ID">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">LinkedIn URL</label>
+        <input type="text" id="mLinkedin" class="form-control" placeholder="https://linkedin.com/in/...">
+      </div>
+      <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:16px;border:1px solid #e9ecef">
+        <div style="font-size:12px;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">📱 Social Media</div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label" style="display:flex;align-items:center;gap:6px">
+              <span style="width:20px;height:20px;background:#1877F2;border-radius:4px;display:inline-flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </span>
+              Facebook
+            </label>
+            <input type="text" id="mFacebook" class="form-control" placeholder="URL หรือชื่อ Facebook">
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label" style="display:flex;align-items:center;gap:6px">
+              <span style="width:20px;height:20px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border-radius:4px;display:inline-flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+              </span>
+              Instagram
+            </label>
+            <input type="text" id="mInstagram" class="form-control" placeholder="URL หรือ @username">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="display:flex;align-items:center;gap:6px">
+              <span style="width:20px;height:20px;background:#FF0000;border-radius:4px;display:inline-flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+              </span>
+              YouTube
+            </label>
+            <input type="text" id="mYoutube" class="form-control" placeholder="URL Channel YouTube">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="display:flex;align-items:center;gap:6px">
+              <span style="width:20px;height:20px;background:#010101;border-radius:4px;display:inline-flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+              </span>
+              TikTok
+            </label>
+            <input type="text" id="mTiktok" class="form-control" placeholder="URL หรือ @username">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="mIsLeader"> หัวหน้ากลุ่ม
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('memberModal')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveMember()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Officer Modal -->
+<div class="modal-overlay" id="officerModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h3 id="officerModalTitle">เพิ่มคณะกรรมการ</h3>
+      <button class="modal-close" onclick="closeModal('officerModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="officerModalAlert"></div>
+      <input type="hidden" id="officerId">
+      <div class="form-group">
+        <label class="form-label">สมาชิก *</label>
+        <select id="oMemberId" class="form-control"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ตำแหน่งในรุ่น (ภาษาไทย) *</label>
+        <input type="text" id="oRoleTh" class="form-control" placeholder="เช่น ประธานรุ่น, รองประธานรุ่น 1">
+        <div id="oRoleButtons" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;color:#adb5bd;align-self:center">เลือกด่วน:</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ตำแหน่ง (English)</label>
+          <input type="text" id="oRoleEn" class="form-control" placeholder="e.g. President">
+          <div id="oRoleEnButtons" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+            <span style="font-size:11px;color:#adb5bd;align-self:center">เลือกด่วน:</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ลำดับแสดง</label>
+          <input type="number" id="oSortOrder" class="form-control" placeholder="1" min="1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('officerModal')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveOfficer()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let allMembers = [];
+  let allGroups = [];
+  let currentSection = 'dashboard';
+
+  function escapeHtml(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function safeHexColor(color, fallback) {
+    const v = String(color ?? '').trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : fallback;
+  }
+
+  function safeUrl(url) {
+    if (typeof url !== 'string') return null;
+    const v = url.trim();
+    return /^https?:\/\//i.test(v) ? v : null;
+  }
+
+  // ตำแหน่งในรุ่น — Thai / English mapping
+  const OFFICER_ROLES = [
+    { th: 'ประธานรุ่น',          en: 'President' },
+    { th: 'รองประธานรุ่น 1',     en: '1st Vice President' },
+    { th: 'รองประธานรุ่น 2',     en: '2nd Vice President' },
+    { th: 'รองประธานรุ่น 3',     en: '3rd Vice President' },
+    { th: 'รองประธานรุ่น 4',     en: '4th Vice President' },
+    { th: 'เลขาธิการ',           en: 'Secretary-General' },
+    { th: 'รองเลขาธิการ',        en: 'Deputy Secretary-General' },
+    { th: 'เหรัญญิก',            en: 'Treasurer' },
+    { th: 'ฝ่ายประชาสัมพันธ์',   en: 'Public Relations Officer' },
+    { th: 'ฝ่ายสวัสดิการ',       en: 'Welfare Officer' },
+    { th: 'ฝ่ายกิจกรรม',         en: 'Activities Officer' },
+    { th: 'ฝ่ายวิชาการ',         en: 'Academic Affairs Officer' },
+  ];
+
+  function selectOfficerRole(th, en) {
+    document.getElementById('oRoleTh').value = th;
+    document.getElementById('oRoleEn').value = en;
+    // Highlight active button
+    document.querySelectorAll('#oRoleButtons .role-btn').forEach(b => {
+      b.style.background = b.dataset.th === th ? '#0d1f4f' : 'white';
+      b.style.color = b.dataset.th === th ? 'white' : '#333';
+      b.style.borderColor = b.dataset.th === th ? '#0d1f4f' : '#dee2e6';
+    });
+    document.querySelectorAll('#oRoleEnButtons .role-btn-en').forEach(b => {
+      b.style.background = b.dataset.en === en ? '#c9a84c' : 'white';
+      b.style.color = b.dataset.en === en ? 'white' : '#333';
+      b.style.borderColor = b.dataset.en === en ? '#c9a84c' : '#dee2e6';
+    });
+  }
+
+  function buildRoleButtons() {
+    const btnStyle = 'font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;font-family:Sarabun,sans-serif;transition:all 0.15s';
+    const thContainer = document.getElementById('oRoleButtons');
+    const enContainer = document.getElementById('oRoleEnButtons');
+    // keep the label span, replace buttons only
+    thContainer.querySelectorAll('.role-btn').forEach(b => b.remove());
+    enContainer.querySelectorAll('.role-btn-en').forEach(b => b.remove());
+    OFFICER_ROLES.forEach(r => {
+      const btnTh = document.createElement('button');
+      btnTh.type = 'button';
+      btnTh.className = 'role-btn';
+      btnTh.dataset.th = r.th;
+      btnTh.textContent = r.th;
+      btnTh.style.cssText = btnStyle + ';border:1px solid #dee2e6;background:white;color:#333';
+      btnTh.onclick = () => selectOfficerRole(r.th, r.en);
+      thContainer.appendChild(btnTh);
+
+      const btnEn = document.createElement('button');
+      btnEn.type = 'button';
+      btnEn.className = 'role-btn-en';
+      btnEn.dataset.en = r.en;
+      btnEn.textContent = r.en;
+      btnEn.style.cssText = btnStyle + ';border:1px solid #dee2e6;background:white;color:#333';
+      btnEn.onclick = () => selectOfficerRole(r.th, r.en);
+      enContainer.appendChild(btnEn);
+    });
+  }
+
+  // Auth check
+  fetch('/api/admin/check').then(r => r.json()).then(d => {
+    if (!d.loggedIn) { window.location.href = '/admin/login'; return; }
+    document.getElementById('adminUsername').textContent = '👤 ' + d.username;
+    init();
+  });
+
+  async function init() {
+    const [members, groups] = await Promise.all([
+      fetch('/api/members').then(r => r.json()),
+      fetch('/api/groups').then(r => r.json())
+    ]);
+    allMembers = members;
+    allGroups = groups;
+    showSection('dashboard');
+  }
+
+  function showSection(section) {
+    currentSection = section;
+    document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+    const navEl = document.getElementById('nav-' + section);
+    if (navEl) navEl.classList.add('active');
+    document.getElementById('topbarActions').innerHTML = '';
+
+    const titles = {
+      dashboard: 'แดชบอร์ด',
+      members: 'จัดการสมาชิก',
+      officers: 'คณะกรรมการรุ่น',
+      groups: 'กลุ่มย่อย',
+      settings: 'ตั้งค่าเว็บไซต์',
+      password: 'เปลี่ยนรหัสผ่าน'
+    };
+    document.getElementById('pageTitle').textContent = titles[section] || section;
+
+    const renders = { dashboard: renderDashboard, members: renderMembers, officers: renderOfficers, groups: renderGroups, settings: renderSettings, password: renderPassword };
+    if (renders[section]) renders[section]();
+  }
+
+  // ===== DASHBOARD =====
+  async function renderDashboard() {
+    const officers = await fetch('/api/officers').then(r => r.json());
+    const groups = await fetch('/api/groups').then(r => r.json());
+    const assignedMembers = allMembers.filter(m => m.group_id).length;
+
+    document.getElementById('adminMain').innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div><div class="stat-number">${allMembers.length}</div><div class="stat-label">สมาชิกทั้งหมด</div></div></div>
+        <div class="stat-card" style="border-left-color:#c9a84c"><div class="stat-icon" style="background:rgba(201,168,76,0.1)">🏅</div><div><div class="stat-number" style="color:#a07830">${officers.length}</div><div class="stat-label">คณะกรรมการ</div></div></div>
+        <div class="stat-card" style="border-left-color:#28a745"><div class="stat-icon" style="background:rgba(40,167,69,0.1)">🤝</div><div><div class="stat-number" style="color:#28a745">${groups.filter(g=>g.members.length>0).length}</div><div class="stat-label">กลุ่มที่มีสมาชิก</div></div></div>
+        <div class="stat-card" style="border-left-color:#17a2b8"><div class="stat-icon" style="background:rgba(23,162,184,0.1)">✅</div><div><div class="stat-number" style="color:#17a2b8">${assignedMembers}</div><div class="stat-label">สมาชิกมีกลุ่มแล้ว</div></div></div>
+      </div>
+      <div class="admin-form-card">
+        <h3 style="font-size:16px;font-weight:700;color:#0d1f4f;margin-bottom:16px">🚀 เริ่มต้นใช้งาน</h3>
+        <div style="display:grid;gap:10px">
+          <div onclick="showSection('members')" style="padding:14px 16px;background:#f8f9fa;border-radius:8px;cursor:pointer;border:1px solid #e9ecef;display:flex;align-items:center;gap:12px;transition:all 0.2s" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+            <span style="font-size:24px">👥</span>
+            <div><div style="font-weight:600;font-size:14px">จัดการสมาชิก</div><div style="font-size:12px;color:#6c757d">แก้ไขข้อมูล ใส่รูปภาพ และข้อมูลติดต่อ</div></div>
+          </div>
+          <div onclick="showSection('officers')" style="padding:14px 16px;background:#f8f9fa;border-radius:8px;cursor:pointer;border:1px solid #e9ecef;display:flex;align-items:center;gap:12px;transition:all 0.2s" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+            <span style="font-size:24px">🏅</span>
+            <div><div style="font-weight:600;font-size:14px">กำหนดคณะกรรมการรุ่น</div><div style="font-size:12px;color:#6c757d">ระบุประธาน รองประธาน และตำแหน่งต่างๆ</div></div>
+          </div>
+          <div onclick="showSection('groups')" style="padding:14px 16px;background:#f8f9fa;border-radius:8px;cursor:pointer;border:1px solid #e9ecef;display:flex;align-items:center;gap:12px;transition:all 0.2s" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+            <span style="font-size:24px">🤝</span>
+            <div><div style="font-weight:600;font-size:14px">จัดกลุ่มย่อย</div><div style="font-size:12px;color:#6c757d">กำหนดชื่อกลุ่มและมอบหมายสมาชิก</div></div>
+          </div>
+          <div onclick="showSection('settings')" style="padding:14px 16px;background:#f8f9fa;border-radius:8px;cursor:pointer;border:1px solid #e9ecef;display:flex;align-items:center;gap:12px;transition:all 0.2s" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+            <span style="font-size:24px">⚙️</span>
+            <div><div style="font-weight:600;font-size:14px">ตั้งค่าเว็บไซต์</div><div style="font-size:12px;color:#6c757d">ชื่อหลักสูตร ปีงบประมาณ ข้อความต้อนรับ</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ===== MEMBERS =====
+  function renderMembers() {
+    document.getElementById('topbarActions').innerHTML = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="exportCSV()" title="ส่งออกข้อมูลทั้งหมดเป็น CSV">⬇️ Export CSV</button>
+        <label class="btn btn-outline" style="cursor:pointer;margin:0" title="นำเข้าข้อมูลจาก CSV">⬆️ Import CSV<input type="file" accept=".csv" style="display:none" onchange="importCSV(this)"></label>
+        <button class="btn btn-gold" onclick="openMemberModal()">➕ เพิ่มสมาชิก</button>
+      </div>`;
+
+    const searchHtml = `<div style="margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="memberSearch" class="form-control" placeholder="🔍 ค้นหาชื่อหรือตำแหน่ง..." style="max-width:300px" oninput="filterMemberTable()">
+      <select id="groupFilter" class="form-control" style="max-width:180px" onchange="filterMemberTable()">
+        <option value="">ทุกกลุ่ม</option>
+        ${allGroups.map(g => `<option value="${g.id}">${escapeHtml(g.name_th)}</option>`).join('')}
+      </select>
+      <span style="font-size:13px;color:#6c757d" id="memberTableCount">${allMembers.length} รายการ</span>
+    </div>`;
+
+    const tableHtml = `
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="memberTable">
+          <thead><tr>
+            <th style="width:50px">ลำดับ</th>
+            <th>ชื่อ-นามสกุล</th>
+            <th>ตำแหน่ง</th>
+            <th>กลุ่ม</th>
+            <th>รูปภาพ</th>
+            <th style="width:120px">จัดการ</th>
+          </tr></thead>
+          <tbody id="memberTableBody">
+          </tbody>
+        </table>
+      </div>`;
+
+    document.getElementById('adminMain').innerHTML = searchHtml + tableHtml;
+    renderMemberTable(allMembers);
+  }
+
+  function filterMemberTable() {
+    const q = document.getElementById('memberSearch').value.toLowerCase();
+    const gId = document.getElementById('groupFilter').value;
+    let filtered = allMembers;
+    if (q) filtered = filtered.filter(m => `${m.prefix}${m.first_name} ${m.last_name} ${m.position}`.toLowerCase().includes(q));
+    if (gId) filtered = filtered.filter(m => String(m.group_id) === gId);
+    document.getElementById('memberTableCount').textContent = filtered.length + ' รายการ';
+    renderMemberTable(filtered);
+  }
+
+  function renderMemberTable(members) {
+    document.getElementById('memberTableBody').innerHTML = members.map(m => {
+      const photoUrl = safeUrl(m.photo);
+      const prefix = escapeHtml(m.prefix || '');
+      const first = escapeHtml(m.first_name || '');
+      const last = escapeHtml(m.last_name || '');
+      const number = escapeHtml(m.number);
+      const positionHtml = m.position ? escapeHtml(m.position) : '<span style="color:#adb5bd">-</span>';
+
+      const groupColor = safeHexColor(m.group_color, '#1a2b5e');
+      const groupHtml = m.group_name
+        ? `<span style="background:${groupColor}20;color:${groupColor};padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600">${escapeHtml(m.group_name)}</span>`
+        : '<span style="color:#adb5bd;font-size:12px">ยังไม่กำหนด</span>';
+
+      return `
+        <tr>
+          <td style="font-weight:600;color:#0d1f4f">${number}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#1a3272;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+                ${photoUrl ? `<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='👤'">` : '<span style="color:#e8c96a;font-size:14px">👤</span>'}
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:14px">${prefix}${first} ${last}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:12px;max-width:200px;color:#495057">${positionHtml}</td>
+          <td>${groupHtml}</td>
+          <td>
+            <label style="cursor:pointer;font-size:12px;color:#1a3272;font-weight:600" title="อัปโหลดรูป">
+              📷 ${photoUrl ? 'เปลี่ยน' : 'เพิ่มรูป'}
+              <input type="file" accept="image/*" style="display:none" onchange="uploadPhoto(${m.id}, this)">
+            </label>
+          </td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-primary" onclick="openMemberModal(${m.id})">✏️</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteMember(${m.id})">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function openMemberModal(id = null) {
+    document.getElementById('memberModalTitle').textContent = id ? 'แก้ไขข้อมูลสมาชิก' : 'เพิ่มสมาชิก';
+    document.getElementById('memberModalAlert').innerHTML = '';
+
+    // Populate group select
+    document.getElementById('mGroupId').innerHTML = '<option value="">-- ยังไม่กำหนดกลุ่ม --</option>' +
+      allGroups.map(g => `<option value="${g.id}">${escapeHtml(g.name_th)}</option>`).join('');
+
+    if (id) {
+      const m = allMembers.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('memberId').value = m.id;
+      document.getElementById('mNumber').value = m.number || '';
+      document.getElementById('mPrefix').value = m.prefix || '';
+      document.getElementById('mFirstName').value = m.first_name || '';
+      document.getElementById('mLastName').value = m.last_name || '';
+      document.getElementById('mNickname').value = m.nickname || '';
+      document.getElementById('mPosition').value = m.position || '';
+      document.getElementById('mOrganization').value = m.organization || '';
+      document.getElementById('mDepartment').value = m.department || '';
+      document.getElementById('mExpertise').value = m.expertise || '';
+      document.getElementById('mEducation').value = m.education || '';
+      document.getElementById('mExperience').value = m.experience || '';
+      document.getElementById('mVision').value = m.vision || '';
+      document.getElementById('mEmail').value = m.email || '';
+      document.getElementById('mPhone').value = m.phone || '';
+      document.getElementById('mLineId').value = m.line_id || '';
+      document.getElementById('mLinkedin').value = m.linkedin || '';
+      document.getElementById('mFacebook').value = m.facebook || '';
+      document.getElementById('mInstagram').value = m.instagram || '';
+      document.getElementById('mYoutube').value = m.youtube || '';
+      document.getElementById('mTiktok').value = m.tiktok || '';
+      document.getElementById('mGroupId').value = m.group_id || '';
+      document.getElementById('mIsLeader').checked = !!m.is_group_leader;
+    } else {
+      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mPosition','mOrganization','mDepartment','mExpertise','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const nums = allMembers.map(m => Number(m.number)).filter(n => Number.isFinite(n) && n >= 0);
+      const nextNum = nums.length ? Math.max(...nums) + 1 : 1;
+      document.getElementById('mNumber').value = String(nextNum);
+      document.getElementById('mIsLeader').checked = false;
+    }
+    openModal('memberModal');
+  }
+
+  async function saveMember() {
+    const id = document.getElementById('memberId').value;
+    const data = {
+      number: document.getElementById('mNumber').value,
+      prefix: document.getElementById('mPrefix').value,
+      first_name: document.getElementById('mFirstName').value,
+      last_name: document.getElementById('mLastName').value,
+      nickname: document.getElementById('mNickname').value,
+      position: document.getElementById('mPosition').value,
+      organization: document.getElementById('mOrganization').value,
+      department: document.getElementById('mDepartment').value,
+      expertise: document.getElementById('mExpertise').value,
+      education: document.getElementById('mEducation').value,
+      experience: document.getElementById('mExperience').value,
+      vision: document.getElementById('mVision').value,
+      email: document.getElementById('mEmail').value,
+      phone: document.getElementById('mPhone').value,
+      line_id: document.getElementById('mLineId').value,
+      linkedin: document.getElementById('mLinkedin').value,
+      facebook: document.getElementById('mFacebook').value,
+      instagram: document.getElementById('mInstagram').value,
+      youtube: document.getElementById('mYoutube').value,
+      tiktok: document.getElementById('mTiktok').value,
+      group_id: document.getElementById('mGroupId').value || null,
+      is_group_leader: document.getElementById('mIsLeader').checked,
+    };
+    if (!data.first_name || !data.last_name) {
+      document.getElementById('memberModalAlert').innerHTML = '<div class="alert alert-error">กรุณากรอกชื่อและนามสกุล</div>';
+      return;
+    }
+    const url = id ? `/api/admin/members/${id}` : '/api/admin/members';
+    const method = id ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    const res = await r.json();
+    if (res.success) {
+      closeModal('memberModal');
+      await refreshMembers();
+      renderMembers();
+    } else {
+      document.getElementById('memberModalAlert').innerHTML = `<div class="alert alert-error">${escapeHtml(res.error)}</div>`;
+    }
+  }
+
+  async function uploadPhoto(memberId, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('photo', file);
+    const r = await fetch(`/api/admin/members/${memberId}/photo`, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (res.success) {
+      await refreshMembers();
+      renderMembers();
+      showToast('อัปโหลดรูปภาพสำเร็จ');
+    }
+  }
+
+  // ===== CSV EXPORT / IMPORT (client-side ทั้งหมด ไม่ผ่าน API) =====
+
+  // --- helper: แปลง array of objects → CSV string ---
+  function toCSV(rows) {
+    if (!rows.length) return '';
+    const headers = Object.keys(rows[0]);
+    const esc = v => {
+      const s = String(v == null ? '' : v);
+      return (s.includes(',') || s.includes('"') || s.includes('\n'))
+        ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    return [headers.join(','), ...rows.map(r => headers.map(h => esc(r[h])).join(','))].join('\n');
+  }
+
+  // --- helper: parse CSV text → array of objects ---
+  function fromCSV(text) {
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const parseLine = line => {
+      const res = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        if (line[i] === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+        else if (line[i] === ',' && !inQ) { res.push(cur); cur = ''; }
+        else cur += line[i];
+      }
+      res.push(cur); return res;
+    };
+    const headers = parseLine(lines[0]);
+    return lines.slice(1).map(line => {
+      const vals = parseLine(line);
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
+      return obj;
+    });
+  }
+
+  // --- Export: ใช้ข้อมูล allMembers ที่โหลดไว้แล้ว ไม่ต้อง fetch ใหม่ ---
+  function exportCSV() {
+    if (!allMembers || !allMembers.length) { alert('ไม่มีข้อมูลสมาชิก'); return; }
+    const rows = allMembers.map(m => ({
+      'ลำดับที่': m.number, 'คำนำหน้า': m.prefix||'', 'ชื่อ': m.first_name||'', 'นามสกุล': m.last_name||'',
+      'ชื่อเล่น': m.nickname||'', 'ตำแหน่ง': m.position||'', 'หน่วยงาน': m.organization||'',
+      'กรม/ฝ่าย': m.department||'', 'ความเชี่ยวชาญ': m.expertise||'', 'ประวัติการศึกษา': m.education||'',
+      'ประสบการณ์': m.experience||'', 'วิสัยทัศน์': m.vision||'',
+      'กลุ่ม': m.group_name||'', 'หัวหน้ากลุ่ม': m.is_group_leader ? 'ใช่' : '',
+      'อีเมล': m.email||'', 'โทรศัพท์': m.phone||'', 'LINE ID': m.line_id||'',
+      'LinkedIn': m.linkedin||'', 'Facebook': m.facebook||'',
+      'Instagram': m.instagram||'', 'YouTube': m.youtube||'', 'TikTok': m.tiktok||'',
+    }));
+    const csv = '\uFEFF' + toCSV(rows); // BOM สำหรับภาษาไทยใน Excel
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'members_export.csv'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Export สำเร็จ!');
+  }
+
+  // --- Import: parse CSV ใน browser แล้วเรียก CRUD API ทีละ row ---
+  async function importCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const confirmed = confirm(`นำเข้าข้อมูลจากไฟล์ "${file.name}" ?\n\n- ถ้ามีสมาชิกที่มีลำดับที่ตรงกัน ระบบจะอัปเดตข้อมูล\n- ถ้าไม่มี ระบบจะเพิ่มสมาชิกใหม่\n- ข้อมูลรูปภาพจะไม่ถูกเปลี่ยนแปลง`);
+    if (!confirmed) { input.value = ''; return; }
+    input.value = '';
+
+    const text = await file.text();
+    const rows = fromCSV(text);
+    if (!rows.length) { alert('ไม่พบข้อมูลในไฟล์'); return; }
+
+    // โหลด groups สำหรับ map ชื่อกลุ่ม → id
+    const grpRes = await fetch('/api/groups');
+    const grpData = await grpRes.json();
+    const groupMap = {};
+    grpData.forEach(g => { groupMap[g.name_th] = g.id; });
+
+    showToast('⏳ กำลังนำเข้าข้อมูล...');
+    let updated = 0, created = 0;
+    const errors = [];
+
+    // โหลด existing members สำหรับ check ว่า number ซ้ำไหม
+    const memRes = await fetch('/api/admin/members');
+    const existingMembers = await memRes.json();
+    const numberToId = {};
+    existingMembers.forEach(m => { numberToId[m.number] = m.id; });
+
+    for (const [i, row] of rows.entries()) {
+      const num = parseInt(row['ลำดับที่']);
+      if (!num) { errors.push(`แถว ${i+2}: ไม่มีลำดับที่`); continue; }
+      const firstName = (row['ชื่อ']||'').trim();
+      const lastName = (row['นามสกุล']||'').trim();
+      if (!firstName || !lastName) { errors.push(`แถว ${i+2}: ไม่มีชื่อ/นามสกุล`); continue; }
+
+      const groupName = (row['กลุ่ม']||'').trim();
+      const payload = {
+        number: num,
+        prefix: (row['คำนำหน้า']||'').trim(),
+        first_name: firstName, last_name: lastName,
+        nickname: (row['ชื่อเล่น']||'').trim() || null,
+        position: (row['ตำแหน่ง']||'').trim() || null,
+        organization: (row['หน่วยงาน']||'').trim() || null,
+        department: (row['กรม/ฝ่าย']||'').trim() || null,
+        expertise: (row['ความเชี่ยวชาญ']||'').trim() || null,
+        education: (row['ประวัติการศึกษา']||'').trim() || null,
+        experience: (row['ประสบการณ์']||'').trim() || null,
+        vision: (row['วิสัยทัศน์']||'').trim() || null,
+        group_id: groupName ? (groupMap[groupName] || null) : null,
+        is_group_leader: (row['หัวหน้ากลุ่ม']||'') === 'ใช่',
+        email: (row['อีเมล']||'').trim() || null,
+        phone: (row['โทรศัพท์']||'').trim() || null,
+        line_id: (row['LINE ID']||'').trim() || null,
+        linkedin: (row['LinkedIn']||'').trim() || null,
+        facebook: (row['Facebook']||'').trim() || null,
+        instagram: (row['Instagram']||'').trim() || null,
+        youtube: (row['YouTube']||'').trim() || null,
+        tiktok: (row['TikTok']||'').trim() || null,
+      };
+
+      try {
+        if (numberToId[num]) {
+          // update
+          const r = await fetch(`/api/admin/members/${numberToId[num]}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (r.ok) updated++; else errors.push(`แถว ${i+2}: อัปเดตไม่สำเร็จ`);
+        } else {
+          // create
+          const r = await fetch('/api/admin/members', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (r.ok) { created++; const d = await r.json(); numberToId[num] = d.id; }
+          else errors.push(`แถว ${i+2}: เพิ่มไม่สำเร็จ`);
+        }
+      } catch(e) { errors.push(`แถว ${i+2}: ${e.message}`); }
+    }
+
+    await refreshMembers();
+    renderMembers();
+    let msg = `✅ นำเข้าสำเร็จ!\nอัปเดต: ${updated} ราย | เพิ่มใหม่: ${created} ราย`;
+    if (errors.length) msg += `\n\nข้อผิดพลาด (${errors.length}):\n` + errors.slice(0,5).join('\n');
+    alert(msg);
+  }
+
+  async function deleteMember(id) {
+    const m = allMembers.find(x => x.id === id);
+    const name = m ? `${m.first_name} ${m.last_name}` : 'สมาชิก';
+    if (!confirm(`ยืนยันลบสมาชิก "${name}"?`)) return;
+    await fetch(`/api/admin/members/${id}`, { method: 'DELETE' });
+    await refreshMembers();
+    renderMembers();
+  }
+
+  async function refreshMembers() {
+    allMembers = await fetch('/api/members').then(r => r.json());
+  }
+
+  // ===== OFFICERS =====
+  async function renderOfficers() {
+    document.getElementById('topbarActions').innerHTML = `<button class="btn btn-gold" onclick="openOfficerModal()">➕ เพิ่มคณะกรรมการ</button>`;
+    const officers = await fetch('/api/officers').then(r => r.json());
+    const sorted = [...officers].sort((a, b) => {
+      const na = Number(a.sort_order); const nb = Number(b.sort_order);
+      const sa = Number.isFinite(na) ? na : 0; const sb = Number.isFinite(nb) ? nb : 0;
+      if (sa !== sb) return sa - sb;
+      return (a.id || 0) - (b.id || 0);
+    });
+
+    let html = '';
+    if (!sorted.length) {
+      html = `<div class="empty-state"><div class="icon">🏅</div><p>ยังไม่มีคณะกรรมการ กดปุ่ม "เพิ่มคณะกรรมการ" เพื่อเริ่มต้น</p></div>`;
+    } else {
+      html = `<div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>ลำดับ</th><th>สมาชิก</th><th>ตำแหน่ง (ไทย)</th><th>ตำแหน่ง (EN)</th><th style="width:120px">จัดการ</th></tr></thead>
+        <tbody>
+          ${sorted.map(o => `<tr>
+            <td>${escapeHtml(o.sort_order)}</td>
+            <td style="font-weight:600">${escapeHtml(o.prefix || '')}${escapeHtml(o.first_name || '')} ${escapeHtml(o.last_name || '')}</td>
+            <td><span style="background:#0d1f4f15;color:#0d1f4f;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">${escapeHtml(o.role_th || '')}</span></td>
+            <td style="font-size:13px;color:#6c757d">${escapeHtml(o.role_en || '-')}</td>
+            <td><div style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-primary" onclick="openOfficerModal(${o.id})">✏️</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteOfficer(${o.id})">🗑️</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+    }
+    document.getElementById('adminMain').innerHTML = html;
+  }
+
+  async function openOfficerModal(id = null) {
+    document.getElementById('officerModalTitle').textContent = id ? 'แก้ไขคณะกรรมการ' : 'เพิ่มคณะกรรมการ';
+    document.getElementById('officerModalAlert').innerHTML = '';
+    document.getElementById('oMemberId').innerHTML = allMembers.map(m =>
+      `<option value="${m.id}">${escapeHtml(m.number)}. ${escapeHtml(m.prefix || '')}${escapeHtml(m.first_name || '')} ${escapeHtml(m.last_name || '')}</option>`
+    ).join('');
+    buildRoleButtons();
+    if (id) {
+      const officers = await fetch('/api/admin/officers').then(r => r.json());
+      const o = officers.find(x => x.id === id);
+      if (!o) return;
+      document.getElementById('officerId').value = o.id;
+      document.getElementById('oMemberId').value = o.member_id;
+      document.getElementById('oRoleTh').value = o.role_th || '';
+      document.getElementById('oRoleEn').value = o.role_en || '';
+      document.getElementById('oSortOrder').value = (o.sort_order != null && o.sort_order !== '') ? String(o.sort_order) : '1';
+      // Highlight matching button if it's a preset role
+      if (o.role_th) {
+        const match = OFFICER_ROLES.find(r => r.th === o.role_th);
+        if (match) selectOfficerRole(match.th, match.en);
+      }
+    } else {
+      ['officerId','oRoleTh','oRoleEn'].forEach(x => document.getElementById(x).value = '');
+      const list = await fetch('/api/officers').then(r => r.json());
+      const nums = list.map(o => Number(o.sort_order)).filter(n => Number.isFinite(n));
+      const nextOrder = nums.length ? Math.max(...nums) + 1 : 1;
+      document.getElementById('oSortOrder').value = String(nextOrder);
+    }
+    openModal('officerModal');
+  }
+
+  async function saveOfficer() {
+    const id = document.getElementById('officerId').value;
+    const data = {
+      member_id: document.getElementById('oMemberId').value,
+      role_th: document.getElementById('oRoleTh').value,
+      role_en: document.getElementById('oRoleEn').value,
+      sort_order: Math.max(1, parseInt(document.getElementById('oSortOrder').value, 10) || 1),
+    };
+    if (!data.role_th) {
+      document.getElementById('officerModalAlert').innerHTML = '<div class="alert alert-error">กรุณากรอกชื่อตำแหน่ง</div>';
+      return;
+    }
+    const url = id ? `/api/admin/officers/${id}` : '/api/admin/officers';
+    const method = id ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    const res = await r.json();
+    if (res.success) { closeModal('officerModal'); renderOfficers(); }
+  }
+
+  async function deleteOfficer(id) {
+    if (!confirm('ยืนยันลบตำแหน่งนี้?')) return;
+    await fetch(`/api/admin/officers/${id}`, { method: 'DELETE' });
+    renderOfficers();
+  }
+
+  // ===== GROUPS =====
+  async function renderGroups() {
+    const groups = await fetch('/api/groups').then(r => r.json());
+    allGroups = groups;
+
+    document.getElementById('adminMain').innerHTML = `
+      <div class="alert alert-info">💡 เพื่อมอบหมายสมาชิกเข้ากลุ่ม ให้ไปที่ "จัดการสมาชิก" แล้วแก้ไขสมาชิกแต่ละคน</div>
+      ${groups.map(g => `
+        <div class="admin-form-card" style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div style="width:16px;height:16px;border-radius:50%;background:${safeHexColor(g.color, '#1a2b5e')}"></div>
+            <h3 style="font-size:15px;font-weight:700;color:#0d1f4f">${escapeHtml(g.name_th)} (${escapeHtml(g.members.length)} คน)</h3>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">ชื่อกลุ่ม (ไทย)</label>
+              <input type="text" id="gName_${g.id}" class="form-control" value="${escapeHtml(g.name_th)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">ชื่อกลุ่ม (English)</label>
+              <input type="text" id="gNameEn_${g.id}" class="form-control" value="${escapeHtml(g.name_en || '')}">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">คำอธิบายกลุ่ม</label>
+              <input type="text" id="gDesc_${g.id}" class="form-control" value="${escapeHtml(g.description || '')}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">สีกลุ่ม</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="color" id="gColor_${g.id}" value="${safeHexColor(g.color, '#1a2b5e')}" style="width:50px;height:38px;border:none;cursor:pointer;border-radius:6px">
+                <input type="text" id="gColorText_${g.id}" value="${safeHexColor(g.color, '#1a2b5e')}" class="form-control" style="flex:1" oninput="document.getElementById('gColor_${g.id}').value=this.value">
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveGroup(${g.id})">💾 บันทึกกลุ่ม</button>
+          <div style="margin-top:12px">
+            <div style="font-size:12px;font-weight:600;color:#6c757d;margin-bottom:8px">สมาชิกในกลุ่ม:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${g.members.length ? g.members.map(m => `
+                <span style="background:${safeHexColor(g.color, '#1a2b5e')}15;color:${safeHexColor(g.color, '#1a2b5e')};border:1px solid ${safeHexColor(g.color, '#1a2b5e')}40;padding:2px 10px;border-radius:20px;font-size:12px">
+                  ${m.is_group_leader ? '⭐ ' : ''}${escapeHtml(m.prefix || '')}${escapeHtml(m.first_name || '')} ${escapeHtml(m.last_name || '')}
+                </span>
+              `).join('') : '<span style="color:#adb5bd;font-size:12px">ยังไม่มีสมาชิก</span>'}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  async function saveGroup(id) {
+    const data = {
+      name_th: document.getElementById(`gName_${id}`).value,
+      name_en: document.getElementById(`gNameEn_${id}`).value,
+      description: document.getElementById(`gDesc_${id}`).value,
+      color: document.getElementById(`gColorText_${id}`).value || document.getElementById(`gColor_${id}`).value,
+    };
+    await fetch(`/api/admin/groups/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    allGroups = await fetch('/api/groups').then(r => r.json());
+    showToast('บันทึกข้อมูลกลุ่มสำเร็จ');
+    renderGroups();
+  }
+
+  // ===== SETTINGS =====
+  async function renderSettings() {
+    const settings = await fetch('/api/settings').then(r => r.json());
+    document.getElementById('adminMain').innerHTML = `
+      <div class="admin-form-card">
+        <h3 style="font-size:15px;font-weight:700;color:#0d1f4f;margin-bottom:20px">⚙️ ตั้งค่าทั่วไป</h3>
+        <div id="settingsAlert"></div>
+        <div class="form-group">
+          <label class="form-label">ชื่อทำเนียบรุ่น (ไทย)</label>
+          <input type="text" id="sSiteTitle" class="form-control" value="${settings.site_title_th || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อทำเนียบรุ่น (English)</label>
+          <input type="text" id="sSiteTitleEn" class="form-control" value="${settings.site_title_en || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อหลักสูตร (ไทย)</label>
+          <input type="text" id="sCourseName" class="form-control" value="${settings.course_name_th || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อหลักสูตร (English)</label>
+          <input type="text" id="sCourseNameEn" class="form-control" value="${settings.course_name_en || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ปีงบประมาณ</label>
+          <input type="text" id="sFiscalYear" class="form-control" value="${settings.fiscal_year || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ข้อความต้อนรับ</label>
+          <input type="text" id="sWelcome" class="form-control" value="${settings.welcome_message || ''}">
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
+      </div>
+    `;
+  }
+
+  async function saveSettings() {
+    const data = {
+      site_title_th: document.getElementById('sSiteTitle').value,
+      site_title_en: document.getElementById('sSiteTitleEn').value,
+      course_name_th: document.getElementById('sCourseName').value,
+      course_name_en: document.getElementById('sCourseNameEn').value,
+      fiscal_year: document.getElementById('sFiscalYear').value,
+      welcome_message: document.getElementById('sWelcome').value,
+    };
+    const r = await fetch('/api/admin/settings', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    const res = await r.json();
+    if (res.success) {
+      document.getElementById('settingsAlert').innerHTML = '<div class="alert alert-success">✅ บันทึกการตั้งค่าสำเร็จ</div>';
+      setTimeout(() => document.getElementById('settingsAlert').innerHTML = '', 3000);
+    }
+  }
+
+  // ===== PASSWORD =====
+  function renderPassword() {
+    document.getElementById('adminMain').innerHTML = `
+      <div class="admin-form-card" style="max-width:400px">
+        <h3 style="font-size:15px;font-weight:700;color:#0d1f4f;margin-bottom:20px">🔐 เปลี่ยนรหัสผ่าน</h3>
+        <div id="pwAlert"></div>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่านปัจจุบัน</label>
+          <input type="password" id="pwCurrent" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่านใหม่</label>
+          <input type="password" id="pwNew" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ยืนยันรหัสผ่านใหม่</label>
+          <input type="password" id="pwConfirm" class="form-control">
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">🔐 เปลี่ยนรหัสผ่าน</button>
+      </div>
+    `;
+  }
+
+  async function changePassword() {
+    const current = document.getElementById('pwCurrent').value;
+    const newPw = document.getElementById('pwNew').value;
+    const confirm = document.getElementById('pwConfirm').value;
+    if (newPw !== confirm) {
+      document.getElementById('pwAlert').innerHTML = '<div class="alert alert-error">รหัสผ่านใหม่ไม่ตรงกัน</div>';
+      return;
+    }
+    const r = await fetch('/api/admin/change-password', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ current_password: current, new_password: newPw })
+    });
+    const res = await r.json();
+    document.getElementById('pwAlert').innerHTML = res.success
+      ? '<div class="alert alert-success">✅ เปลี่ยนรหัสผ่านสำเร็จ</div>'
+      : `<div class="alert alert-error">${escapeHtml(res.error)}</div>`;
+    if (res.success) { document.getElementById('pwCurrent').value = ''; document.getElementById('pwNew').value = ''; document.getElementById('pwConfirm').value = ''; }
+  }
+
+  // ===== HELPERS =====
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0d1f4f;color:white;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;font-family:Sarabun,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.2)';
+    toast.textContent = '✅ ' + msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  async function logout() {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  }
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+  });
+
+  // Mobile sidebar toggle
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebarToggle').style.display = 'block';
+  }
+</script>
+</body>
+</html>
