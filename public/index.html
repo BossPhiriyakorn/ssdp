@@ -80,11 +80,6 @@
       <div class="members-grid" id="membersGrid">
         <div class="loading"><div class="spinner"></div><span>กำลังโหลดข้อมูล...</span></div>
       </div>
-      <nav class="members-pagination" id="membersPagination" aria-label="แบ่งหน้ารายชื่อสมาชิก" hidden>
-        <button type="button" class="members-pagination__btn" id="membersPrevBtn" onclick="membersPrevPage()">← ก่อนหน้า</button>
-        <span class="members-pagination__info" id="membersPageInfo">หน้า 1 / 1</span>
-        <button type="button" class="members-pagination__btn" id="membersNextBtn" onclick="membersNextPage()">ถัดไป →</button>
-      </nav>
     </div>
   </div>
 
@@ -102,8 +97,6 @@
   <script>
     let allMembers = [];
     let currentMemberList = [];
-    let currentPage = 1;
-    const MEMBERS_PAGE_SIZE = 10;
 
     function escapeHtml(s) {
       return String(s ?? '')
@@ -184,10 +177,6 @@
 
     function paintMembersGrid() {
       const grid = document.getElementById('membersGrid');
-      const pag = document.getElementById('membersPagination');
-      const prevBtn = document.getElementById('membersPrevBtn');
-      const nextBtn = document.getElementById('membersNextBtn');
-      const pageInfo = document.getElementById('membersPageInfo');
       const countEl = document.getElementById('membersCount');
       const members = currentMemberList;
       const q = document.getElementById('searchInput').value.trim();
@@ -195,7 +184,6 @@
 
       if (!members.length) {
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>ไม่พบสมาชิกที่ค้นหา</p></div>`;
-        pag.hidden = true;
         countEl.textContent = isFiltered
           ? 'ไม่พบรายการที่ตรงกับการค้นหา'
           : `แสดง 0 รายการ จากทั้งหมด ${allMembers.length} ท่าน`;
@@ -203,51 +191,17 @@
       }
 
       const total = members.length;
-      const totalPages = Math.max(1, Math.ceil(total / MEMBERS_PAGE_SIZE));
-      if (currentPage > totalPages) currentPage = totalPages;
-      const start = (currentPage - 1) * MEMBERS_PAGE_SIZE;
-      const pageSlice = members.slice(start, start + MEMBERS_PAGE_SIZE);
-      const from = start + 1;
-      const to = start + pageSlice.length;
-
       const countText = isFiltered
-        ? `แสดงรายการ ${from}–${to} จาก ${total} รายการที่ค้นพบ · หน้า ${currentPage} / ${totalPages} (ในรุ่นทั้งหมด ${allMembers.length} ท่าน)`
-        : `แสดงรายการ ${from}–${to} จากทั้งหมด ${allMembers.length} ท่าน · หน้า ${currentPage} / ${totalPages}`;
+        ? `แสดง ${total} รายการที่ค้นพบ (ในรุ่นทั้งหมด ${allMembers.length} ท่าน)`
+        : `แสดงทั้งหมด ${allMembers.length} ท่าน`;
       countEl.textContent = countText;
 
-      grid.innerHTML = pageSlice.map(memberCardHtml).join('');
-
-      if (totalPages <= 1) {
-        pag.hidden = true;
-      } else {
-        pag.hidden = false;
-        pageInfo.textContent = `หน้า ${currentPage} / ${totalPages}`;
-        prevBtn.disabled = currentPage <= 1;
-        nextBtn.disabled = currentPage >= totalPages;
-      }
+      grid.innerHTML = members.map(memberCardHtml).join('');
     }
 
     function renderMembers(members) {
       currentMemberList = members;
-      currentPage = 1;
       paintMembersGrid();
-    }
-
-    function membersPrevPage() {
-      if (currentPage > 1) {
-        currentPage--;
-        paintMembersGrid();
-        document.getElementById('membersGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    function membersNextPage() {
-      const totalPages = Math.max(1, Math.ceil(currentMemberList.length / MEMBERS_PAGE_SIZE));
-      if (currentPage < totalPages) {
-        currentPage++;
-        paintMembersGrid();
-        document.getElementById('membersGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
     }
 
     function filterMembers() {
