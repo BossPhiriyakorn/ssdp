@@ -109,6 +109,16 @@
 
             <div class="profile-kv profile-kv--block-full">
               <div class="profile-kv__label profile-kv__label--with-icon">
+                <i data-lucide="map-pin" width="16" height="16" aria-hidden="true"></i>
+                ที่อยู่
+              </div>
+              <div class="profile-kv__value profile-kv__value--block" id="pfAddress"></div>
+            </div>
+
+            <div class="profile-panel__divider" role="presentation"></div>
+
+            <div class="profile-kv profile-kv--block-full">
+              <div class="profile-kv__label profile-kv__label--with-icon">
                 <i data-lucide="graduation-cap" width="16" height="16" aria-hidden="true"></i>
                 ประวัติการศึกษา
               </div>
@@ -267,6 +277,21 @@
       return digits.length >= 7 ? digits : null;
     }
 
+    function buildAddressText(member) {
+      const parts = [
+        member.house_no ? `บ้านเลขที่ ${member.house_no}` : '',
+        member.village_no ? `หมู่ที่ ${member.village_no}` : '',
+        member.village_name || '',
+        member.soi ? `ซอย${member.soi}` : '',
+        member.road ? `ถนน${member.road}` : '',
+        member.subdistrict ? `แขวง/ตำบล${member.subdistrict}` : '',
+        member.district ? `เขต/อำเภอ${member.district}` : '',
+        member.province || '',
+        member.postal_code || '',
+      ].map(v => String(v || '').trim()).filter(Boolean);
+      return parts.join(' ');
+    }
+
     async function loadMember() {
       try {
         const m = await fetch(`/api/members/${memberId}`).then(r => r.json());
@@ -316,6 +341,7 @@
 
         setField('pfDepartment', m.department);
         setField('pfExpertise', m.expertise);
+        setField('pfAddress', buildAddressText(m));
         setField('pfEducation', m.education);
 
         const nickTrim = (m.nickname || '').trim();

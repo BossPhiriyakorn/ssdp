@@ -109,6 +109,48 @@
         <label class="form-label">ความเชี่ยวชาญ</label>
         <input type="text" id="mExpertise" class="form-control" placeholder="สาขาความเชี่ยวชาญ">
       </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">บ้านเลขที่</label>
+          <input type="text" id="mHouseNo" class="form-control" placeholder="เช่น 99/1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมู่ที่</label>
+          <input type="text" id="mVillageNo" class="form-control" placeholder="เช่น 5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อหมู่บ้าน/อาคาร/โครงการ</label>
+          <input type="text" id="mVillageName" class="form-control" placeholder="เช่น โครงการ...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ซอย</label>
+          <input type="text" id="mSoi" class="form-control" placeholder="เช่น ซอยงามวงศ์วาน 10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ถนน</label>
+          <input type="text" id="mRoad" class="form-control" placeholder="เช่น ถนนงามวงศ์วาน">
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">แขวง/ตำบล</label>
+          <input type="text" id="mSubdistrict" class="form-control" placeholder="แขวง/ตำบล">
+        </div>
+        <div class="form-group">
+          <label class="form-label">เขต/อำเภอ</label>
+          <input type="text" id="mDistrict" class="form-control" placeholder="เขต/อำเภอ">
+        </div>
+        <div class="form-group">
+          <label class="form-label">จังหวัด</label>
+          <input type="text" id="mProvince" class="form-control" placeholder="จังหวัด">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รหัสไปรษณีย์</label>
+        <input type="text" id="mPostalCode" class="form-control" placeholder="10110" inputmode="numeric" maxlength="5">
+      </div>
       <div class="form-group">
         <label class="form-label">ประวัติการศึกษา</label>
         <textarea id="mEducation" class="form-control" placeholder="ระดับการศึกษา สถาบัน..."></textarea>
@@ -549,6 +591,15 @@
       document.getElementById('mOrganization').value = m.organization || '';
       document.getElementById('mDepartment').value = m.department || '';
       document.getElementById('mExpertise').value = m.expertise || '';
+      document.getElementById('mHouseNo').value = m.house_no || '';
+      document.getElementById('mVillageNo').value = m.village_no || '';
+      document.getElementById('mVillageName').value = m.village_name || '';
+      document.getElementById('mSoi').value = m.soi || '';
+      document.getElementById('mRoad').value = m.road || '';
+      document.getElementById('mSubdistrict').value = m.subdistrict || '';
+      document.getElementById('mDistrict').value = m.district || '';
+      document.getElementById('mProvince').value = m.province || '';
+      document.getElementById('mPostalCode').value = m.postal_code || '';
       document.getElementById('mEducation').value = m.education || '';
       document.getElementById('mExperience').value = m.experience || '';
       document.getElementById('mVision').value = m.vision || '';
@@ -563,7 +614,7 @@
       document.getElementById('mGroupId').value = m.group_id || '';
       document.getElementById('mIsLeader').checked = !!m.is_group_leader;
     } else {
-      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mBirthDate','mAgeComputed','mPosition','mOrganization','mDepartment','mExpertise','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
+      ['memberId','mPrefix','mFirstName','mLastName','mNickname','mBirthDate','mAgeComputed','mPosition','mOrganization','mDepartment','mExpertise','mHouseNo','mVillageNo','mVillageName','mSoi','mRoad','mSubdistrict','mDistrict','mProvince','mPostalCode','mEducation','mExperience','mVision','mEmail','mPhone','mLineId','mLinkedin','mFacebook','mInstagram','mYoutube','mTiktok'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -589,6 +640,15 @@
       organization: document.getElementById('mOrganization').value,
       department: document.getElementById('mDepartment').value,
       expertise: document.getElementById('mExpertise').value,
+      house_no: document.getElementById('mHouseNo').value,
+      village_no: document.getElementById('mVillageNo').value,
+      village_name: document.getElementById('mVillageName').value,
+      soi: document.getElementById('mSoi').value,
+      road: document.getElementById('mRoad').value,
+      subdistrict: document.getElementById('mSubdistrict').value,
+      district: document.getElementById('mDistrict').value,
+      province: document.getElementById('mProvince').value,
+      postal_code: document.getElementById('mPostalCode').value,
       education: document.getElementById('mEducation').value,
       experience: document.getElementById('mExperience').value,
       vision: document.getElementById('mVision').value,
@@ -677,7 +737,11 @@
       'ลำดับที่': m.number, 'คำนำหน้า': m.prefix||'', 'ชื่อ': m.first_name||'', 'นามสกุล': m.last_name||'',
       'ชื่อเล่น': m.nickname||'', 'วันเกิด': (m.birth_date && String(m.birth_date).slice(0, 10)) || '',
       'ตำแหน่ง': m.position||'', 'หน่วยงาน': m.organization||'',
-      'กรม/ฝ่าย': m.department||'', 'ความเชี่ยวชาญ': m.expertise||'', 'ประวัติการศึกษา': m.education||'',
+      'กรม/ฝ่าย': m.department||'', 'ความเชี่ยวชาญ': m.expertise||'',
+      'บ้านเลขที่': m.house_no||'', 'หมู่ที่': m.village_no||'', 'ชื่อหมู่บ้าน/อาคาร/โครงการ': m.village_name||'',
+      'ซอย': m.soi||'', 'ถนน': m.road||'', 'แขวง/ตำบล': m.subdistrict||'', 'เขต/อำเภอ': m.district||'',
+      'จังหวัด': m.province||'', 'รหัสไปรษณีย์': m.postal_code||'',
+      'ประวัติการศึกษา': m.education||'',
       'ประสบการณ์': m.experience||'', 'วิสัยทัศน์': m.vision||'',
       'กลุ่ม': m.group_name||'', 'หัวหน้ากลุ่ม': m.is_group_leader ? 'ใช่' : '',
       'อีเมล': m.email||'', 'โทรศัพท์': m.phone||'', 'LINE ID': m.line_id||'',
@@ -747,6 +811,15 @@
         organization: (row['หน่วยงาน']||'').trim() || null,
         department: (row['กรม/ฝ่าย']||'').trim() || null,
         expertise: (row['ความเชี่ยวชาญ']||'').trim() || null,
+        house_no: (row['บ้านเลขที่']||'').trim() || null,
+        village_no: (row['หมู่ที่']||'').trim() || null,
+        village_name: (row['ชื่อหมู่บ้าน/อาคาร/โครงการ']||'').trim() || null,
+        soi: (row['ซอย']||'').trim() || null,
+        road: (row['ถนน']||'').trim() || null,
+        subdistrict: (row['แขวง/ตำบล']||'').trim() || null,
+        district: (row['เขต/อำเภอ']||'').trim() || null,
+        province: (row['จังหวัด']||'').trim() || null,
+        postal_code: (row['รหัสไปรษณีย์']||'').trim() || null,
         education: (row['ประวัติการศึกษา']||'').trim() || null,
         experience: (row['ประสบการณ์']||'').trim() || null,
         vision: (row['วิสัยทัศน์']||'').trim() || null,
